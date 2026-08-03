@@ -230,6 +230,9 @@ PY
       # Data/plugins stay in ~/.asdf; without this entry, onActivation.cleanup
       # = "zap" removes asdf on every switch.
       "asdf"
+      # MongoDB shell (constructease local/staging db work). Core formula;
+      # pulls brew node as a dep — asdf shims stay first on PATH for `node`.
+      "mongosh"
     ];
     casks = [
       "ghostty"

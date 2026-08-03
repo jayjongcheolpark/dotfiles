@@ -16,7 +16,7 @@ If you find a bug, please open a GitHub Issue using the bug report template.
 Running the switch builds:
 
 - System settings (dark mode, key repeat, dock, Finder, trackpad, English + Korean preferred languages, Canadian keyboard + 2-Set Hangul, Remote Login/SSH)
-- Homebrew apps (casks and CLI tools: herdr, asdf, bun, Claude Code, Ghostty, Tailscale, …)
+- Homebrew apps (casks and CLI tools: herdr, asdf, bun, mongosh, Claude Code, Ghostty, Tailscale, …)
 - Nix user packages (ripgrep, fd, fzf, jq, lazygit, gh, Neovim, Hack Nerd Font)
 - Shell (zsh, aliases, starship prompt)
 - Editor (Neovim config with the rose-pine moon theme)
