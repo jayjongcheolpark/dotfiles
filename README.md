@@ -15,20 +15,22 @@ If you find a bug, please open a GitHub Issue using the bug report template.
 
 Running the switch builds:
 
-- System settings (dark mode, key repeat, dock, Finder, trackpad)
+- System settings (dark mode, key repeat, dock, Finder, trackpad, English + Korean preferred languages, Canadian keyboard + 2-Set Hangul)
 - Homebrew apps (casks and CLI tools)
 - Nix user packages (ripgrep, fd, fzf, jq, lazygit, Neovim, Hack Nerd Font)
 - Shell (zsh, aliases, starship prompt)
 - Editor (Neovim config with the rose-pine moon theme)
-- Terminal (WezTerm config with the rose-pine moon theme and dimmed unfocused windows)
+- Terminal (Ghostty with rose-pine moon, Hack Nerd Font, soft blur; Tailscale via Homebrew)
 - Agent configs (Claude, Codex, opencode all share one AGENTS.md)
 - Optional Pi theme and local extensions, generic UI settings and model overrides, plus two deliberately pinned third-party Pi packages
 
 ## Prerequisites
 
-- Apple Silicon Mac, by default.
-- Intel Mac: change one line.
-  In `configuration.nix`, set `nixpkgs.hostPlatform = "x86_64-darwin";` (the comment right there tells you the same thing).
+- Apple Silicon Mac, by default (Determinate Nix).
+- Intel Mac: change two things in `configuration.nix`:
+  1. `nixpkgs.hostPlatform = "x86_64-darwin";`
+  2. Keep `nix.enable = true` (this repo's Intel path uses official Nix; Determinate no longer ships `x86_64-darwin`).
+  `bootstrap.sh` picks the installer from your CPU automatically.
 
 ## Fresh-machine setup
 
@@ -47,13 +49,15 @@ Change the host label or CPU architecture if needed, and read the Homebrew clean
 ./bootstrap.sh
 ```
 
-`bootstrap.sh` does four things, in order:
+`bootstrap.sh` does these things, in order:
 
-1. Installs Determinate Nix, if it isn't already installed.
+1. Installs Nix if it isn't already installed (Determinate on Apple Silicon; official multi-user Nix on Intel Macs).
 2. Symlinks this repo to `~/.dotfiles`.
    This has to happen before the first build, because `home.nix` points at config files through `~/.dotfiles`.
 3. Checks the `user` configured in `flake.nix` against your actual macOS username, and offers to fix it for you if they differ.
-4. Runs the first `darwin-rebuild switch`.
+4. Sets aside installer-owned `/etc` files (`nix.conf`, `bashrc`, `zshrc`) so nix-darwin can manage them on first switch.
+5. Restores Nix volume mount config (`synthetic.conf` / `fstab` / `darwin-store`) if a previous installer cleanup removed it.
+6. Runs the first `darwin-rebuild switch`.
    It fetches the `darwin-rebuild` tool from the nix-darwin 26.05 release branch, then applies this repo's locked flake config.
 
 After that, `darwin-rebuild` exists and you're on the normal workflow below.
@@ -176,7 +180,7 @@ Home Manager deliberately does not manage `~/.pi/agent` itself, or Pi authentica
 
 The first time you launch `nvim`, it bootstraps [lazy.nvim](https://github.com/folke/lazy.nvim) by cloning plugins from GitHub.
 That needs network access once; after that it's offline.
-Neovim and WezTerm both use the rose-pine moon theme.
+Neovim and Ghostty both use the rose-pine moon theme.
 Neovim keeps italics off and uses a transparent background on macOS, Windows, and WSL so it matches the terminal setup.
 
 ## License

@@ -22,12 +22,19 @@ in
   fonts.fontconfig.enable = true;
   home.sessionVariables.EDITOR = "nvim";
 
+  # Grok CLI (installer used to drop this into a hand-written ~/.zshrc).
+  home.sessionPath = [ "${config.home.homeDirectory}/.grok/bin" ];
+
   programs.zsh = {
     enable = true;
     autosuggestion.enable = true;      # ghost text from history
     syntaxHighlighting.enable = true;  # commands turn green when valid
     initContent = ''
       bindkey '^f' autosuggest-accept
+      # Grok CLI zsh completions (if present)
+      if [ -d "$HOME/.grok/completions/zsh" ]; then
+        fpath=("$HOME/.grok/completions/zsh" $fpath)
+      fi
     '';
     shellAliases = {
       ".." = "cd ..";
@@ -62,8 +69,8 @@ in
   };
 
   # Edit-in-place: the real file stays in my repo, ~/.config just points at it.
-  home.file.".config/wezterm".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/wezterm";
+  home.file.".config/ghostty".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/ghostty";
   home.file.".config/nvim".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/nvim";
   home.file.".config/herdr".source =

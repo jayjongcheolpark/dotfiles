@@ -30,6 +30,9 @@
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
+            # Existing ~/.zshrc (and similar) get moved to *.<ext> instead of
+            # aborting activation — common on first switch after a manual shell setup.
+            home-manager.backupFileExtension = "before-home-manager";
             home-manager.extraSpecialArgs = { inherit user; };
             home-manager.users.${user} = import ./home.nix;
           }

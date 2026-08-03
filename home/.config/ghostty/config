@@ -1,0 +1,22 @@
+# Ghostty — ported from the old WezTerm setup (rose-pine moon, Hack, soft blur).
+# Docs: https://ghostty.org/docs/config/reference
+
+theme = Rose Pine Moon
+font-family = Hack Nerd Font
+font-size = 15
+
+background-opacity = 0.8
+# Blur intensity (integer). true ≈ 20; higher can look soft/slow on some GPUs.
+background-blur = 50
+
+# Dim inactive splits so the focused pane is obvious (WezTerm did this for
+# unfocused windows; Ghostty exposes the same idea for splits).
+unfocused-split-opacity = 0.62
+
+# Minimal chrome, similar to WezTerm's RESIZE + hide-tab-if-one-tab.
+macos-titlebar-style = hidden
+window-padding-x = 8
+window-padding-y = 6
+
+# macOS: left Option as Alt for terminal bindings.
+macos-option-as-alt = left
