@@ -12,6 +12,10 @@ home/.config/herdr/.plugins.lock
 result
 result-*
 
+# Homebrew can leave unexpanded path placeholders under the cwd on error
+\{\{pkgetc\}\}/
+\{\{etc\}\}/
+
 # Pi credentials and Home Manager adoption backups stay local
 /home/.pi/agent/auth.json
 /home/.pi/agent/**/*.backup
