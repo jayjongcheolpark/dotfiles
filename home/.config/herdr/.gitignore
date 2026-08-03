@@ -2,8 +2,10 @@
 *.sock
 *.log
 session.json
+session.json.pre-restore.*
 .plugins.lock
 release-notes.json
-# installed plugin packages (install via herdr plugin install)
+# installed plugin packages (install via `herdr plugin install` /
+# home.activation.installHerdrPlugins in home.nix — do not commit binaries)
 plugins/github/
 plugins.json

@@ -133,27 +133,64 @@ PY
     killall TextInputSwitcher 2>/dev/null || true
     killall SystemUIServer 2>/dev/null || true
 
-    # Shared Homebrew for every admin (nina + jaypark). Both are already in
-    # the admin group. nix-homebrew / brew bundle run as primaryUser and can
-    # leave owner-only modes; reassert group write after each switch.
-    # - g+rwX: existing files/dirs writable by admin
-    # - setgid on dirs: new entries inherit group admin
-    # - directory ACLs with file_inherit: new files stay admin-writable
-    #   even under umask 022 (without walking every file in Cellar)
-    # - exception: share/zsh must NOT be group-writable — zsh compinit treats
-    #   group-writable fpath dirs as insecure and prompts every shell start
+    # Single-user Homebrew for ${user}. Ownership must match primaryUser so
+    # brew / nix-homebrew can write without sudo, and so zsh compinit does
+    # not treat group-writable fpath dirs as insecure every shell start.
+    # Strips any leftover multi-admin setgid / ACLs / group-write from older
+    # nina+jaypark sharing.
     if [ -d /opt/homebrew ]; then
-      echo "sharing /opt/homebrew with admin group..." >&2
-      /usr/bin/chgrp -R admin /opt/homebrew
-      /bin/chmod -R g+rwX /opt/homebrew
-      /usr/bin/find /opt/homebrew -type d -exec /bin/chmod g+s {} +
-      /usr/bin/find /opt/homebrew -type d -exec /bin/chmod -N {} + 2>/dev/null || true
-      /usr/bin/find /opt/homebrew -type d -exec /bin/chmod +a "group:admin allow list,add_file,search,add_subdirectory,delete_child,readattr,writeattr,readextattr,writeextattr,readsecurity,file_inherit,directory_inherit" {} + 2>/dev/null || true
-      if [ -d /opt/homebrew/share/zsh ]; then
-        /bin/chmod -R g-w /opt/homebrew/share/zsh
-        /usr/bin/find /opt/homebrew/share/zsh -type d -exec /bin/chmod g-s {} +
-        /usr/bin/find /opt/homebrew/share/zsh -type d -exec /bin/chmod -N {} + 2>/dev/null || true
-        /bin/chmod -R g+rX /opt/homebrew/share/zsh
+      echo "owning /opt/homebrew as ${user}..." >&2
+      /usr/sbin/chown -R ${user}:admin /opt/homebrew
+      /usr/bin/find /opt/homebrew -type d -exec /bin/chmod g-s {} + 2>/dev/null || true
+      /usr/bin/find /opt/homebrew -exec /bin/chmod -N {} + 2>/dev/null || true
+      /bin/chmod -R go-w /opt/homebrew
+
+      # Some casks (e.g. claude-code) have landed in Caskroom as 644, so
+      # /opt/homebrew/bin/<name> resolves but shells report "permission denied".
+      # Restore +x on any Caskroom target linked from bin/.
+      for link in /opt/homebrew/bin/*; do
+        [ -L "$link" ] || continue
+        target=$(/usr/bin/readlink "$link")
+        case "$target" in
+          /*) ;;
+          *) target="$(/usr/bin/dirname "$link")/$target" ;;
+        esac
+        case "$target" in
+          /opt/homebrew/Caskroom/*) ;;
+          *) continue ;;
+        esac
+        if [ -f "$target" ] && [ ! -x "$target" ]; then
+          echo "restoring execute bit on $(basename "$link") ($target)..." >&2
+          /bin/chmod a+x "$target" || true
+        fi
+      done
+
+      # Casks (e.g. Ghostty) symlink zsh completions into site-functions from
+      # /Applications/*.app. If that app was installed by another macOS user,
+      # compaudit rejects the file (owner must be root or $EUID). SIP often
+      # blocks chown on app bundles, so materialize those links as real files
+      # owned by ${user}.
+      sitefn=/opt/homebrew/share/zsh/site-functions
+      if [ -d "$sitefn" ]; then
+        for f in "$sitefn"/_*; do
+          [ -L "$f" ] || continue
+          target=$(/usr/bin/readlink "$f")
+          case "$target" in
+            /*) ;;
+            *) target="$(/usr/bin/dirname "$f")/$target" ;;
+          esac
+          [ -e "$target" ] || continue
+          owner=$(/usr/bin/stat -f %Su "$target")
+          if [ "$owner" != "${user}" ] && [ "$owner" != "root" ]; then
+            echo "materializing zsh completion $(basename "$f") (target owned by $owner)..." >&2
+            tmp=$(/usr/bin/mktemp)
+            /bin/cp "$target" "$tmp"
+            /bin/rm -f "$f"
+            /bin/mv "$tmp" "$f"
+            /usr/sbin/chown ${user}:admin "$f"
+            /bin/chmod 644 "$f"
+          fi
+        done
       fi
     fi
   '';
@@ -185,6 +222,8 @@ PY
     casks = [
       "ghostty"
       "tailscale-app"  # Homebrew renamed the Tailscale cask from "tailscale"
+      # Claude Code CLI (`claude` on PATH via /opt/homebrew/bin/claude).
+      # home.activation.ensureClaudeCode also reinstalls/fixes +x if missing.
       "claude-code"
       "1password"
       # Secrets manager for agent/CLI hardening.

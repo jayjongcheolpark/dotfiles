@@ -1,7 +1,14 @@
-{ config, pkgs, user, ... }:
+{ config, pkgs, lib, user, ... }:
 
 let
   dotfiles = "${config.home.homeDirectory}/.dotfiles";
+
+  # herdr plugins to ensure on every home-manager activation.
+  # Plugin *packages* are installed under ~/.config/herdr/plugins/github/ (gitignored).
+  # Authored plugin config lives under home/.config/herdr/plugins/config/<id>/.
+  herdrPlugins = [
+    "cloudmanic/herdr-plus"
+  ];
 in
 
 {
@@ -24,7 +31,11 @@ in
   home.sessionVariables.EDITOR = "nvim";
 
   # Grok CLI (installer used to drop this into a hand-written ~/.zshrc).
-  home.sessionPath = [ "${config.home.homeDirectory}/.grok/bin" ];
+  # ~/.local/bin: Anthropic's native `claude` installer (fallback if not using the brew cask).
+  home.sessionPath = [
+    "${config.home.homeDirectory}/.grok/bin"
+    "${config.home.homeDirectory}/.local/bin"
+  ];
 
   # Fuzzy finder + zsh widgets (jaypark had oh-my-zsh plugin "fzf"):
   #   Ctrl-R  → shell history
@@ -106,4 +117,70 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
   home.file.".config/opencode/AGENTS.md".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
+
+  # Install herdr plugins that are declared above but not yet registered.
+  # herdr itself is a Homebrew brew (see configuration.nix); brew may not be
+  # on activation PATH, so pin the common prefixes.
+  # Idempotent: skips when the plugin_id is already enabled.
+  home.activation.installHerdrPlugins = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+    if ! command -v herdr >/dev/null 2>&1; then
+      echo "herdr not on PATH; skip herdr plugin install" >&2
+    else
+      plugin_list_json="$(herdr plugin list --json 2>/dev/null || true)"
+      ${lib.concatMapStringsSep "\n" (spec: ''
+        plugin_spec=${lib.escapeShellArg spec}
+        # cloudmanic/herdr-plus -> cloudmanic.herdr-plus
+        plugin_id="$(printf '%s' "$plugin_spec" | tr '/' '.')"
+        if printf '%s' "$plugin_list_json" | ${pkgs.jq}/bin/jq -e \
+          --arg id "$plugin_id" \
+          'any(.result.plugins[]?; .plugin_id == $id and .enabled == true)' \
+          >/dev/null 2>&1; then
+          echo "herdr plugin already installed: $plugin_id" >&2
+        else
+          echo "installing herdr plugin: $plugin_spec" >&2
+          $DRY_RUN_CMD herdr plugin install "$plugin_spec" --yes
+        fi
+      '') herdrPlugins}
+    fi
+  '';
+
+  # Ensure Claude Code CLI is present and executable.
+  # Primary install is the Homebrew cask `claude-code` (configuration.nix).
+  # This activation covers fresh machines / zap recovery / the 644-bit cask bug.
+  home.activation.ensureClaudeCode = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+    ensure_claude_x() {
+      local link target
+      link="$(command -v claude 2>/dev/null || true)"
+      if [ -z "$link" ]; then
+        return 1
+      fi
+      if [ -L "$link" ]; then
+        target="$(/usr/bin/readlink "$link")"
+        case "$target" in
+          /*) ;;
+          *) target="$(/usr/bin/dirname "$link")/$target" ;;
+        esac
+      else
+        target="$link"
+      fi
+      if [ -f "$target" ] && [ ! -x "$target" ]; then
+        echo "restoring execute bit on claude ($target)..." >&2
+        $DRY_RUN_CMD /bin/chmod a+x "$target"
+      fi
+      # Re-check: command -v ignores non-executable files.
+      command -v claude >/dev/null 2>&1
+    }
+
+    if ensure_claude_x; then
+      echo "claude already available: $(command -v claude)" >&2
+    elif command -v brew >/dev/null 2>&1; then
+      echo "installing Claude Code via Homebrew cask..." >&2
+      $DRY_RUN_CMD brew install --cask claude-code
+      ensure_claude_x || echo "warning: claude still not executable after brew install" >&2
+    else
+      echo "brew not on PATH; cannot install claude-code cask" >&2
+    fi
+  '';
 }

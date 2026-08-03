@@ -16,7 +16,7 @@ If you find a bug, please open a GitHub Issue using the bug report template.
 Running the switch builds:
 
 - System settings (dark mode, key repeat, dock, Finder, trackpad, English + Korean preferred languages, Canadian keyboard + 2-Set Hangul, Remote Login/SSH)
-- Homebrew apps (casks and CLI tools: herdr, bun, Ghostty, Tailscale, …)
+- Homebrew apps (casks and CLI tools: herdr, bun, Claude Code, Ghostty, Tailscale, …)
 - Nix user packages (ripgrep, fd, fzf, jq, lazygit, gh, Neovim, Hack Nerd Font)
 - Shell (zsh, aliases, starship prompt)
 - Editor (Neovim config with the rose-pine moon theme)
@@ -118,6 +118,15 @@ Read through `brews` and `casks` before you run `bootstrap.sh` or `rebuild.sh` f
 **About `herdr`:** it's in the `brews` list.
 It's a real public Homebrew formula (`brew info herdr` finds it in homebrew-core, no tap needed), so it will install fine.
 If you don't use it, just remove it from `brews` in your copy.
+
+**About `claude` (Claude Code CLI):** the `claude-code` Homebrew cask is in `configuration.nix` `homebrew.casks`, so nix-darwin installs it on switch.
+`home.nix` also runs `home.activation.ensureClaudeCode`: if `claude` is missing it runs `brew install --cask claude-code`, and if the cask binary landed without `+x` (zsh "permission denied") it restores the execute bit.
+`~/.local/bin` is on `home.sessionPath` so Anthropic's native installer path still works as a fallback.
+If you don't use Claude Code, remove `claude-code` from `casks` and drop `ensureClaudeCode` from `home.nix`.
+
+**About `herdr-plus`:** the plugin is declared in `home.nix` (`herdrPlugins`) and installed on home-manager activation when missing (`herdr plugin install cloudmanic/herdr-plus --yes`).
+Authored plugin config (worktree auto-layout, quick-actions) lives under `home/.config/herdr/plugins/config/cloudmanic.herdr-plus/`; the installed package under `plugins/github/` is gitignored.
+To add another herdr plugin later, append its `owner/repo` to `herdrPlugins` and put config under `plugins/config/<owner>.<repo>/`.
 
 **Heads-up:**
 
