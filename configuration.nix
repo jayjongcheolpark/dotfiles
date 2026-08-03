@@ -233,6 +233,8 @@ PY
       # MongoDB shell (constructease local/staging db work). Core formula;
       # pulls brew node as a dep — asdf shims stay first on PATH for `node`.
       "mongosh"
+      # Sentry CLI (releases, sourcemaps, debug files). Core formula.
+      "sentry-cli"
     ];
     casks = [
       "ghostty"
