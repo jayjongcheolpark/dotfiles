@@ -1,0 +1,9 @@
+# runtime
+*.sock
+*.log
+session.json
+.plugins.lock
+release-notes.json
+# installed plugin packages (install via herdr plugin install)
+plugins/github/
+plugins.json

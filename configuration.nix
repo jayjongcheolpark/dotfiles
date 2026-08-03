@@ -1,14 +1,21 @@
 { user, ... }:
 
 {
-  # Official Nix on Intel: let nix-darwin manage the daemon and nix.conf.
-  # On Apple Silicon with Determinate Nix, set this to false instead
-  # (Determinate already manages the daemon).
-  nix.enable = true;
+  # Determinate Nix (Apple Silicon default) manages its own daemon — do not
+  # let nix-darwin take over. On Intel with official Nix, set this to true
+  # so nix-darwin manages the daemon and nix.conf.
+  nix.enable = false;
+  # With nix.enable = false these settings are not applied by nix-darwin;
+  # bootstrap.sh and Determinate already enable flakes. Kept for the Intel
+  # path when nix.enable is flipped back to true.
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   nixpkgs.config.allowUnfree = true;
-  nixpkgs.hostPlatform = "x86_64-darwin"; # use aarch64-darwin for Apple Silicon
+  nixpkgs.hostPlatform = "aarch64-darwin"; # use x86_64-darwin for Intel
+
+  # Touch ID / Apple Watch for sudo (replaces a typical /etc/pam.d/sudo_local).
+  # Mac Studio has no Touch ID sensor; Apple Watch still uses pam_tid.so.
+  security.pam.services.sudo_local.touchIdAuth = true;
 
   system.primaryUser = user;
   users.users.${user} = {
@@ -23,7 +30,7 @@
       AppleInterfaceStyle = "Dark";
       KeyRepeat = 2;          # fast key repeat
       InitialKeyRepeat = 15;  # short delay before repeat
-      _HIHideMenuBar = true;  # auto-hide the menu bar
+      _HIHideMenuBar = false;  # keep the menu bar always visible
       AppleShowAllExtensions = true;
 
       # Keyboard settings panel (spelling / substitutions) — all off.
@@ -34,7 +41,7 @@
       NSAutomaticQuoteSubstitutionEnabled = false;
       NSAutomaticDashSubstitutionEnabled = false;
     };
-    dock.autohide = true;
+    dock.autohide = false;  # keep the Dock always visible
     finder.FXPreferredViewStyle = "Nlsv";  # list view by default
     finder.CreateDesktop = false;          # clean desktop
     trackpad.Clicking = true;              # tap to click
@@ -125,10 +132,38 @@ PY
     killall TextInputMenuAgent 2>/dev/null || true
     killall TextInputSwitcher 2>/dev/null || true
     killall SystemUIServer 2>/dev/null || true
+
+    # Shared Homebrew for every admin (nina + jaypark). Both are already in
+    # the admin group. nix-homebrew / brew bundle run as primaryUser and can
+    # leave owner-only modes; reassert group write after each switch.
+    # - g+rwX: existing files/dirs writable by admin
+    # - setgid on dirs: new entries inherit group admin
+    # - directory ACLs with file_inherit: new files stay admin-writable
+    #   even under umask 022 (without walking every file in Cellar)
+    # - exception: share/zsh must NOT be group-writable — zsh compinit treats
+    #   group-writable fpath dirs as insecure and prompts every shell start
+    if [ -d /opt/homebrew ]; then
+      echo "sharing /opt/homebrew with admin group..." >&2
+      /usr/bin/chgrp -R admin /opt/homebrew
+      /bin/chmod -R g+rwX /opt/homebrew
+      /usr/bin/find /opt/homebrew -type d -exec /bin/chmod g+s {} +
+      /usr/bin/find /opt/homebrew -type d -exec /bin/chmod -N {} + 2>/dev/null || true
+      /usr/bin/find /opt/homebrew -type d -exec /bin/chmod +a "group:admin allow list,add_file,search,add_subdirectory,delete_child,readattr,writeattr,readextattr,writeextattr,readsecurity,file_inherit,directory_inherit" {} + 2>/dev/null || true
+      if [ -d /opt/homebrew/share/zsh ]; then
+        /bin/chmod -R g-w /opt/homebrew/share/zsh
+        /usr/bin/find /opt/homebrew/share/zsh -type d -exec /bin/chmod g-s {} +
+        /usr/bin/find /opt/homebrew/share/zsh -type d -exec /bin/chmod -N {} + 2>/dev/null || true
+        /bin/chmod -R g+rX /opt/homebrew/share/zsh
+      fi
+    fi
   '';
   nix-homebrew = {
     enable = true;
     inherit user;
+    # Adopt an existing /opt/homebrew (or /usr/local) install instead of
+    # aborting. Keeps already-installed packages; onActivation.cleanup = "zap"
+    # still removes anything not listed in homebrew.brews/casks below.
+    autoMigrate = true;
   };
   homebrew = {
     enable = true;
@@ -145,6 +180,7 @@ PY
     ];
     brews = [
       "herdr"
+      "bun"  # JS runtime / package manager (e.g. constructease/app)
     ];
     casks = [
       "ghostty"

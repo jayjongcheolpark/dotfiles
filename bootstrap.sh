@@ -113,13 +113,18 @@ else
 fi
 
 echo "==> Step 4: hand /etc files from the Nix installer over to nix-darwin"
-# First activation aborts if these still have installer-written content.
+# First activation aborts if these still have installer/OS-written content.
 # Renaming with the required suffix lets nix-darwin replace them safely.
-# Contents are only the stock Nix multi-user hooks + nix.conf; nothing custom.
-for f in /etc/nix/nix.conf /etc/bashrc /etc/zshrc; do
-  if [ -e "$f" ] && [ ! -e "${f}.before-nix-darwin" ]; then
+# - nix.conf / bashrc / zshrc: stock Nix multi-user hooks
+# - pam.d/sudo_local: common macOS Touch ID / Apple Watch for sudo (template
+#   or user-edited). nix-darwin manages this by default; recreate via
+#   security.pam.services.sudo_local.touchIdAuth if you want it back.
+for f in /etc/nix/nix.conf /etc/bashrc /etc/zshrc /etc/pam.d/sudo_local; do
+  if [ -e "$f" ] && [ ! -L "$f" ] && [ ! -e "${f}.before-nix-darwin" ]; then
     echo "    mv $f -> ${f}.before-nix-darwin"
     sudo mv "$f" "${f}.before-nix-darwin"
+  elif [ -L "$f" ]; then
+    echo "    $f already a symlink (nix-darwin), ok"
   elif [ -e "${f}.before-nix-darwin" ]; then
     echo "    already set aside: ${f}.before-nix-darwin"
   else

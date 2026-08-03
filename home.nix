@@ -12,7 +12,7 @@ in
     # cli i use constantly
     ripgrep   # fast search
     fd        # fast find
-    fzf       # fuzzy finder
+    # fzf via programs.fzf (installs binary + zsh keybindings)
     jq        # json on the command line
     lazygit
     gh        # GitHub CLI
@@ -25,6 +25,17 @@ in
 
   # Grok CLI (installer used to drop this into a hand-written ~/.zshrc).
   home.sessionPath = [ "${config.home.homeDirectory}/.grok/bin" ];
+
+  # Fuzzy finder + zsh widgets (jaypark had oh-my-zsh plugin "fzf"):
+  #   Ctrl-R  → shell history
+  #   Ctrl-T  → files under cwd
+  #   Alt-C   → cd into directory
+  programs.fzf = {
+    enable = true;
+    enableZshIntegration = true;
+    defaultCommand = "fd --type f --hidden --follow --exclude .git";
+    fileWidgetCommand = "fd --type f --hidden --follow --exclude .git";
+  };
 
   programs.zsh = {
     enable = true;

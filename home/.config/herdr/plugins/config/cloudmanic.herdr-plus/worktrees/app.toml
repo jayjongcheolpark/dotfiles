@@ -1,0 +1,15 @@
+# Auto layout for ConstructEase worktrees created/opened in herdr.
+# Left pane: worktree setup (env files) + dependency install, then claude.
+# Right pane: empty shell for ad-hoc use (bun run dev, codex, ...).
+repo = "app"
+
+[[tabs]]
+name = "claude"
+
+[[tabs.panes]]
+label = "claude"
+command = "scripts/worktree-setup.sh && bun run install:all && claude"
+
+[[tabs.panes]]
+label = "terminal"
+split = "right"

@@ -16,7 +16,7 @@ If you find a bug, please open a GitHub Issue using the bug report template.
 Running the switch builds:
 
 - System settings (dark mode, key repeat, dock, Finder, trackpad, English + Korean preferred languages, Canadian keyboard + 2-Set Hangul, Remote Login/SSH)
-- Homebrew apps (casks and CLI tools)
+- Homebrew apps (casks and CLI tools: herdr, bun, Ghostty, Tailscale, …)
 - Nix user packages (ripgrep, fd, fzf, jq, lazygit, gh, Neovim, Hack Nerd Font)
 - Shell (zsh, aliases, starship prompt)
 - Editor (Neovim config with the rose-pine moon theme)
@@ -27,10 +27,10 @@ Running the switch builds:
 
 ## Prerequisites
 
-- Apple Silicon Mac, by default (Determinate Nix).
+- Apple Silicon Mac, by default (Determinate Nix; `nix.enable = false`).
 - Intel Mac: change two things in `configuration.nix`:
   1. `nixpkgs.hostPlatform = "x86_64-darwin";`
-  2. Keep `nix.enable = true` (this repo's Intel path uses official Nix; Determinate no longer ships `x86_64-darwin`).
+  2. `nix.enable = true` (official Nix; Determinate no longer ships `x86_64-darwin`).
   `bootstrap.sh` picks the installer from your CPU automatically.
 
 ## Fresh-machine setup
@@ -56,7 +56,7 @@ Change the host label or CPU architecture if needed, and read the Homebrew clean
 2. Symlinks this repo to `~/.dotfiles`.
    This has to happen before the first build, because `home.nix` points at config files through `~/.dotfiles`.
 3. Checks the `user` configured in `flake.nix` against your actual macOS username, and offers to fix it for you if they differ.
-4. Sets aside installer-owned `/etc` files (`nix.conf`, `bashrc`, `zshrc`) so nix-darwin can manage them on first switch.
+4. Sets aside installer/OS-owned `/etc` files (`nix.conf`, `bashrc`, `zshrc`, `pam.d/sudo_local`) so nix-darwin can manage them on first switch.
 5. Restores Nix volume mount config (`synthetic.conf` / `fstab` / `darwin-store`) if a previous installer cleanup removed it.
 6. Runs the first `darwin-rebuild switch`.
    It fetches the `darwin-rebuild` tool from the nix-darwin 26.05 release branch, then applies this repo's locked flake config.
