@@ -15,6 +15,7 @@ in
     fzf       # fuzzy finder
     jq        # json on the command line
     lazygit
+    gh        # GitHub CLI
     neovim
     # the font everything renders in
     nerd-fonts.hack
