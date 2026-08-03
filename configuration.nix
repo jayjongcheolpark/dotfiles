@@ -14,6 +14,9 @@
   users.users.${user} = {
     home = "/Users/${user}";
   };
+  # macOS Remote Login (sshd on port 22). Needed for herdr --remote / SSH
+  # over Tailscale. nix-darwin enables com.openssh.sshd via launchctl.
+  services.openssh.enable = true;
   system.stateVersion = 6;
   system.defaults = {
     NSGlobalDomain = {
