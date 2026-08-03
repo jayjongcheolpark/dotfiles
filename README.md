@@ -21,6 +21,7 @@ Running the switch builds:
 - Shell (zsh, aliases, starship prompt)
 - Editor (Neovim config with the rose-pine moon theme)
 - Terminal (Ghostty with rose-pine moon, Hack Nerd Font, soft blur; Tailscale via Homebrew)
+- Automic Vault (Homebrew tap `automic-vault/isotopes`; arm64-only upstream cask)
 - Agent configs (Claude, Codex, opencode all share one AGENTS.md)
 - Optional Pi theme and local extensions, generic UI settings and model overrides, plus two deliberately pinned third-party Pi packages
 

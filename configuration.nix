@@ -132,6 +132,14 @@ PY
     onActivation.cleanup = "zap";  # remove anything not listed here
     onActivation.autoUpdate = true;
     onActivation.extraFlags = [ "--force" ];
+    # Third-party tap for Automic Vault (not in homebrew-cask core).
+    # trusted = true is required under Homebrew's tap-trust rules during activation.
+    taps = [
+      {
+        name = "automic-vault/isotopes";
+        trusted = true;
+      }
+    ];
     brews = [
       "herdr"
     ];
@@ -139,6 +147,10 @@ PY
       "ghostty"
       "tailscale-app"  # Homebrew renamed the Tailscale cask from "tailscale"
       "claude-code"
+      "1password"
+      # Secrets manager for agent/CLI hardening.
+      # Upstream cask is arm64-only (depends_on arch: :arm64); Intel Macs cannot install it.
+      "automic-vault/isotopes/automic-vault"
     ];
   };
 }
