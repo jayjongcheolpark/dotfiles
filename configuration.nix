@@ -241,6 +241,8 @@ PY
       # home.activation.ensureClaudeCode also reinstalls/fixes +x if missing.
       "claude-code"
       "1password"
+      # Local Whisper dictation app (arm64, macOS 14+).
+      "opensuperwhisper"
       # Secrets manager for agent/CLI hardening.
       # Upstream cask is arm64-only (depends_on arch: :arm64); Intel Macs cannot install it.
       "automic-vault/isotopes/automic-vault"
