@@ -16,7 +16,7 @@ If you find a bug, please open a GitHub Issue using the bug report template.
 Running the switch builds:
 
 - System settings (dark mode, key repeat, dock, Finder, trackpad, English + Korean preferred languages, Canadian keyboard + 2-Set Hangul, Remote Login/SSH)
-- Homebrew apps (casks and CLI tools: herdr, bun, Claude Code, Ghostty, Tailscale, …)
+- Homebrew apps (casks and CLI tools: herdr, asdf, bun, Claude Code, Ghostty, Tailscale, …)
 - Nix user packages (ripgrep, fd, fzf, jq, lazygit, gh, Neovim, Hack Nerd Font)
 - Shell (zsh, aliases, starship prompt)
 - Editor (Neovim config with the rose-pine moon theme)
@@ -118,6 +118,15 @@ Read through `brews` and `casks` before you run `bootstrap.sh` or `rebuild.sh` f
 **About `herdr`:** it's in the `brews` list.
 It's a real public Homebrew formula (`brew info herdr` finds it in homebrew-core, no tap needed), so it will install fine.
 If you don't use it, just remove it from `brews` in your copy.
+
+**About `asdf`:** also in `brews`. constructease (and `~/.tool-versions`) pin Node/bun/etc via asdf; without the formula listed, `homebrew.onActivation.cleanup = "zap"` uninstalls it on every switch.
+Three pieces must all be present or Claude/codex `SessionStart` hooks die with `node: command not found` / `exec: asdf: not found`:
+
+1. **brew `asdf` binary** (`/opt/homebrew/bin/asdf`) — shims run `exec asdf exec …`
+2. **`~/.asdf/shims` on PATH** — via `home.sessionPath`, login `profileExtra`, and `/etc/paths.d/40-asdf-shims` (so path_helper / GUI / Claude hooks see it, not only interactive zsh)
+3. **`ASDF_DATA_DIR=~/.asdf`** — existing plugins/installs; do not point at the old Intel `~/.asdf-x86`
+
+After a machine migration, `./rebuild.sh` rewrites the paths.d entry and home-manager zprofile; brew reinstalls `asdf` if zap removed it.
 
 **About `claude` (Claude Code CLI):** the `claude-code` Homebrew cask is in `configuration.nix` `homebrew.casks`, so nix-darwin installs it on switch.
 `home.nix` also runs `home.activation.ensureClaudeCode`: if `claude` is missing it runs `brew install --cask claude-code`, and if the cask binary landed without `+x` (zsh "permission denied") it restores the execute bit.

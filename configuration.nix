@@ -21,6 +21,14 @@
   users.users.${user} = {
     home = "/Users/${user}";
   };
+
+  # asdf shims for every process that uses path_helper (login shells, many GUI
+  # apps, Claude Code SessionStart hooks). Homebrew is already in
+  # /etc/paths.d/homebrew → /opt/homebrew/bin (asdf binary). Without this,
+  # shims never appear on PATH outside interactive zsh, so `node` fails even
+  # though ~/.asdf/installs/* is populated.
+  environment.etc."paths.d/40-asdf-shims".text = "/Users/${user}/.asdf/shims\n";
+
   # macOS Remote Login (sshd on port 22). Needed for herdr --remote / SSH
   # over Tailscale. nix-darwin enables com.openssh.sshd via launchctl.
   services.openssh.enable = true;
@@ -218,6 +226,10 @@ PY
     brews = [
       "herdr"
       "bun"  # JS runtime / package manager (e.g. constructease/app)
+      # Version manager for constructease (.tool-versions: nodejs, bun, …).
+      # Data/plugins stay in ~/.asdf; without this entry, onActivation.cleanup
+      # = "zap" removes asdf on every switch.
+      "asdf"
     ];
     casks = [
       "ghostty"

@@ -28,11 +28,18 @@ in
     nerd-fonts.hack
   ];
   fonts.fontconfig.enable = true;
-  home.sessionVariables.EDITOR = "nvim";
+  home.sessionVariables = {
+    EDITOR = "nvim";
+    # asdf 0.16+ (Homebrew formula) stores plugins/installs here. Keep it
+    # out of zshrc-only so non-interactive zsh (and hm-session-vars) see it.
+    ASDF_DATA_DIR = "${config.home.homeDirectory}/.asdf";
+  };
 
   # Grok CLI (installer used to drop this into a hand-written ~/.zshrc).
   # ~/.local/bin: Anthropic's native `claude` installer (fallback if not using the brew cask).
+  # ~/.asdf/shims: asdf 0.16+ — shim → `asdf exec`; brew puts `asdf` on PATH.
   home.sessionPath = [
+    "${config.home.homeDirectory}/.asdf/shims"
     "${config.home.homeDirectory}/.grok/bin"
     "${config.home.homeDirectory}/.local/bin"
   ];
@@ -52,6 +59,19 @@ in
     enable = true;
     autosuggestion.enable = true;      # ghost text from history
     syntaxHighlighting.enable = true;  # commands turn green when valid
+    # Login shells (.zprofile). Replaces the old hand-written zprofile that
+    # still pointed at nvm / asdf-x86 after the Intel → Apple Silicon move.
+    profileExtra = ''
+      if [ -x /opt/homebrew/bin/brew ]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+      fi
+      # asdf 0.16+: no need to source asdf.sh — shims + brew `asdf` are enough.
+      export ASDF_DATA_DIR="''${ASDF_DATA_DIR:-$HOME/.asdf}"
+      case ":$PATH:" in
+        *":$ASDF_DATA_DIR/shims:"*) ;;
+        *) export PATH="$ASDF_DATA_DIR/shims:$PATH" ;;
+      esac
+    '';
     initContent = ''
       bindkey '^f' autosuggest-accept
       # Grok CLI zsh completions (if present)
