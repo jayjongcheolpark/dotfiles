@@ -36,7 +36,7 @@ in
   };
 
   # Grok CLI (installer used to drop this into a hand-written ~/.zshrc).
-  # ~/.local/bin: Anthropic's native `claude` installer (fallback if not using the brew cask).
+  # ~/.local/bin: native installers for claude / codex (fallback if not using brew casks).
   # ~/.asdf/shims: asdf 0.16+ — shim → `asdf exec`; brew puts `asdf` on PATH.
   home.sessionPath = [
     "${config.home.homeDirectory}/.asdf/shims"

@@ -242,6 +242,10 @@ PY
       # Claude Code CLI (`claude` on PATH via /opt/homebrew/bin/claude).
       # home.activation.ensureClaudeCode also reinstalls/fixes +x if missing.
       "claude-code"
+      # OpenAI Codex CLI (`codex` on PATH via /opt/homebrew/bin/codex).
+      # home.nix alias: co = "codex --full-auto". Standalone installer under
+      # ~/.local/bin is a fallback when sessionPath includes it.
+      "codex"
       "1password"
       # Local Whisper dictation app (arm64, macOS 14+).
       "opensuperwhisper"

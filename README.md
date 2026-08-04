@@ -16,7 +16,7 @@ If you find a bug, please open a GitHub Issue using the bug report template.
 Running the switch builds:
 
 - System settings (dark mode, key repeat, dock, Finder, trackpad, English + Korean preferred languages, Canadian keyboard + 2-Set Hangul, Remote Login/SSH)
-- Homebrew apps (casks and CLI tools: herdr, asdf, bun, mongosh, sentry-cli, Claude Code, OpenSuperWhisper, Ghostty, Tailscale, …)
+- Homebrew apps (casks and CLI tools: herdr, asdf, bun, mongosh, sentry-cli, Claude Code, Codex, OpenSuperWhisper, Ghostty, Tailscale, …)
 - Nix user packages (ripgrep, fd, fzf, zoxide, jq, lazygit, gh, Neovim, Hack Nerd Font)
 - Shell (zsh with autosuggestions/completions, `z` via zoxide, aliases, starship prompt)
 - Editor (Neovim config with the rose-pine moon theme)
@@ -132,6 +132,10 @@ After a machine migration, `./rebuild.sh` rewrites the paths.d entry and home-ma
 `home.nix` also runs `home.activation.ensureClaudeCode`: if `claude` is missing it runs `brew install --cask claude-code`, and if the cask binary landed without `+x` (zsh "permission denied") it restores the execute bit.
 `~/.local/bin` is on `home.sessionPath` so Anthropic's native installer path still works as a fallback.
 If you don't use Claude Code, remove `claude-code` from `casks` and drop `ensureClaudeCode` from `home.nix`.
+
+**About `codex` (OpenAI Codex CLI):** the `codex` Homebrew cask is in `configuration.nix` `homebrew.casks`, so nix-darwin installs `/opt/homebrew/bin/codex` on switch.
+OpenAI's standalone installer may also put a binary at `~/.local/bin/codex`; that path is on `home.sessionPath`, but brew's `/opt/homebrew/bin` is the reliable install for every shell.
+If you don't use Codex, remove `codex` from `casks` and the `co` alias from `home.nix`.
 
 **About `herdr-plus`:** the plugin is declared in `home.nix` (`herdrPlugins`) and installed on home-manager activation when missing (`herdr plugin install cloudmanic/herdr-plus --yes`).
 Authored plugin config (worktree auto-layout, quick-actions) lives under `home/.config/herdr/plugins/config/cloudmanic.herdr-plus/`; the installed package under `plugins/github/` is gitignored.
