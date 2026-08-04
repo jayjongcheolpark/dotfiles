@@ -55,8 +55,17 @@ in
     fileWidgetCommand = "fd --type f --hidden --follow --exclude .git";
   };
 
+  # Smart cd (old hand-written zshrc: `eval "$(zoxide init zsh)"`):
+  #   z foo   → jump to frecent directory matching foo
+  #   zi foo  → interactive picker (needs fzf)
+  programs.zoxide = {
+    enable = true;
+    enableZshIntegration = true;
+  };
+
   programs.zsh = {
     enable = true;
+    enableCompletion = true;           # tab completion (compinit)
     autosuggestion.enable = true;      # ghost text from history
     syntaxHighlighting.enable = true;  # commands turn green when valid
     # Login shells (.zprofile). Replaces the old hand-written zprofile that
@@ -74,7 +83,11 @@ in
     '';
     initContent = ''
       bindkey '^f' autosuggest-accept
-      # Grok CLI zsh completions (if present)
+      # History substring search on arrows (old zshrc)
+      bindkey '^[[A' history-search-backward
+      bindkey '^[[B' history-search-forward
+      # Grok CLI zsh completions (if present). Prepend fpath before any
+      # late re-compinit callers; home-manager already ran compinit above.
       if [ -d "$HOME/.grok/completions/zsh" ]; then
         fpath=("$HOME/.grok/completions/zsh" $fpath)
       fi

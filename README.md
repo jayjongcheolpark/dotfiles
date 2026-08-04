@@ -17,8 +17,8 @@ Running the switch builds:
 
 - System settings (dark mode, key repeat, dock, Finder, trackpad, English + Korean preferred languages, Canadian keyboard + 2-Set Hangul, Remote Login/SSH)
 - Homebrew apps (casks and CLI tools: herdr, asdf, bun, mongosh, sentry-cli, Claude Code, OpenSuperWhisper, Ghostty, Tailscale, …)
-- Nix user packages (ripgrep, fd, fzf, jq, lazygit, gh, Neovim, Hack Nerd Font)
-- Shell (zsh, aliases, starship prompt)
+- Nix user packages (ripgrep, fd, fzf, zoxide, jq, lazygit, gh, Neovim, Hack Nerd Font)
+- Shell (zsh with autosuggestions/completions, `z` via zoxide, aliases, starship prompt)
 - Editor (Neovim config with the rose-pine moon theme)
 - Terminal (Ghostty with rose-pine moon, Hack Nerd Font, soft blur; Tailscale via Homebrew)
 - Automic Vault (Homebrew tap `automic-vault/isotopes`; arm64-only upstream cask)
