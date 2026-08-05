@@ -235,6 +235,8 @@ PY
       "mongosh"
       # Sentry CLI (releases, sourcemaps, debug files). Core formula.
       "sentry-cli"
+      # Microsoft Azure CLI (`az` on PATH). Core formula.
+      "azure-cli"
     ];
     casks = [
       "ghostty"
