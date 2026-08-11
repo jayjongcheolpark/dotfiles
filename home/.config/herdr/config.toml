@@ -17,6 +17,7 @@ copy_mode  = "prefix+y"  # herdr's copy-mode entry key; copy-mode's own internal
 # Agents panel order: explicit choice of "spaces" (grouped by space, the default) over "priority".
 agent_panel_sort = "spaces"
 
+show_agent_labels_on_pane_borders = true
 [[keys.command]]
 key = "prefix+down"
 type = "plugin_action"
@@ -28,3 +29,6 @@ key = "prefix+b"
 type = "shell"
 command = '"${HERDR_BIN_PATH}" plugin pane open --plugin official.browser --entrypoint browser --placement split --direction right --focus'
 description = "open browser in right split"
+
+[ui.toast]
+delivery = "system"
