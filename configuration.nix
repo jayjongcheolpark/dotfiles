@@ -255,6 +255,8 @@ PY
       # Secrets manager for agent/CLI hardening.
       # Upstream cask is arm64-only (depends_on arch: :arm64); Intel Macs cannot install it.
       "automic-vault/isotopes/automic-vault"
+      # Crisp desktop app from the didriksg Homebrew tap.
+      "didriksg/tap/crisp"
     ];
   };
 }
