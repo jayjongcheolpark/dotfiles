@@ -13,6 +13,8 @@
 steps:
   - label: ":shell: shellcheck"
     key: shellcheck
+    agents:
+      queue: macos
     command: |
       command -v nix >/dev/null 2>&1 || {
         echo "shellcheck step needs 'nix' on PATH (it supplies shellcheck)."
@@ -26,6 +28,8 @@ steps:
 
   - label: ":test_tube: tests"
     key: tests
+    agents:
+      queue: macos
     command: |
       # Guard first: an empty glob would let this step pass vacuously.
       ls tests/*.test.sh >/dev/null 2>&1 || {
@@ -40,6 +44,8 @@ steps:
 
   - label: ":nix: flake eval"
     key: flake
+    agents:
+      queue: macos
     command: |
       command -v nix >/dev/null 2>&1 || {
         echo "flake step needs 'nix' on PATH."
