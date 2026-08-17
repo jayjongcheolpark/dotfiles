@@ -1,0 +1,57 @@
+# Buildkite CI for these dotfiles.
+#
+# Agent assumptions (kept deliberately small):
+#   - macOS, running a Buildkite agent as the captain's own user.
+#   - `nix` on PATH. It is a hard requirement of this repo anyway, and it also
+#     supplies shellcheck, so the agent needs no extra tooling installed.
+#   - Everything else (shellcheck) is fetched by nix from the same nixpkgs
+#     channel flake.nix pins, so CI and the machine config never drift.
+#
+# Each step guards its tools up front and fails with an actionable message
+# rather than a bare "command not found".
+
+steps:
+  - label: ":shell: shellcheck"
+    key: shellcheck
+    command: |
+      command -v nix >/dev/null 2>&1 || {
+        echo "shellcheck step needs 'nix' on PATH (it supplies shellcheck)."
+        echo "The Buildkite agent's shell may not source the nix profile;"
+        echo "add /nix/var/nix/profiles/default/bin to the agent's PATH."
+        exit 1
+      }
+      # -x follows `. tests/lib.sh` so sourced definitions are analysed too.
+      nix run 'github:NixOS/nixpkgs/nixpkgs-26.05-darwin#shellcheck' -- \
+        -x bootstrap.sh rebuild.sh tests/lib.sh tests/pi-calm.test.sh
+
+  - label: ":test_tube: tests"
+    key: tests
+    command: |
+      # Guard first: an empty glob would let this step pass vacuously.
+      ls tests/*.test.sh >/dev/null 2>&1 || {
+        echo "No tests/*.test.sh found - the test step would pass vacuously."
+        exit 1
+      }
+      # Each test file is its own runner (see tests/lib.sh); -t echoes the test
+      # as it starts, and xargs runs every test and still exits non-zero if any
+      # of them failed. No shell variables anywhere in this file on purpose:
+      # Buildkite interpolates dollar-prefixed names at pipeline-upload time.
+      find tests -maxdepth 1 -name '*.test.sh' -print0 | xargs -0 -n1 -t bash
+
+  - label: ":nix: flake eval"
+    key: flake
+    command: |
+      command -v nix >/dev/null 2>&1 || {
+        echo "flake step needs 'nix' on PATH."
+        echo "The Buildkite agent's shell may not source the nix profile;"
+        echo "add /nix/var/nix/profiles/default/bin to the agent's PATH."
+        exit 1
+      }
+      # Evaluation only - never builds or activates the system.
+      nix flake check --no-build --no-update-lock-file
+      # Forces the whole darwin module tree (configuration.nix, home.nix,
+      # nix-homebrew, home-manager) to evaluate down to a derivation.
+      # Catches option typos and broken module wiring; builds nothing.
+      nix eval --raw --no-update-lock-file \
+        .#darwinConfigurations.mac.system.drvPath >/dev/null
+      echo "darwinConfigurations.mac evaluates cleanly"
