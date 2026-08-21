@@ -36,8 +36,8 @@ in
   };
 
   # Grok CLI (installer used to drop this into a hand-written ~/.zshrc).
-  # ~/.local/bin: native installers for claude / codex (fallback if not using brew casks).
-  # ~/.asdf/shims: asdf 0.16+ — shim → `asdf exec`; brew puts `asdf` on PATH.
+  # ~/.local/bin: Anthropic native Claude Code (`claude`) and other installers.
+  # ~/.asdf/shims: asdf 0.16+ - shim → `asdf exec`; brew puts `asdf` on PATH.
   home.sessionPath = [
     "${config.home.homeDirectory}/.asdf/shims"
     "${config.home.homeDirectory}/.grok/bin"
@@ -74,7 +74,9 @@ in
       if [ -x /opt/homebrew/bin/brew ]; then
         eval "$(/opt/homebrew/bin/brew shellenv)"
       fi
-      # asdf 0.16+: no need to source asdf.sh — shims + brew `asdf` are enough.
+      # Native CLIs (claude) ahead of Homebrew so a leftover cask cannot shadow.
+      export PATH="$HOME/.local/bin:$PATH"
+      # asdf 0.16+: no need to source asdf.sh - shims + brew `asdf` are enough.
       export ASDF_DATA_DIR="''${ASDF_DATA_DIR:-$HOME/.asdf}"
       case ":$PATH:" in
         *":$ASDF_DATA_DIR/shims:"*) ;;
@@ -178,42 +180,13 @@ in
     fi
   '';
 
-  # Ensure Claude Code CLI is present and executable.
-  # Primary install is the Homebrew cask `claude-code` (configuration.nix).
-  # This activation covers fresh machines / zap recovery / the 644-bit cask bug.
+  # Native Claude Code CLI (`~/.local/bin/claude`). Homebrew's cask lags
+  # Anthropic releases, so do not put `claude-code` back in homebrew.casks.
+  # Re-running the installer is idempotent and pulls the latest stable.
   home.activation.ensureClaudeCode = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
-    ensure_claude_x() {
-      local link target
-      link="$(command -v claude 2>/dev/null || true)"
-      if [ -z "$link" ]; then
-        return 1
-      fi
-      if [ -L "$link" ]; then
-        target="$(/usr/bin/readlink "$link")"
-        case "$target" in
-          /*) ;;
-          *) target="$(/usr/bin/dirname "$link")/$target" ;;
-        esac
-      else
-        target="$link"
-      fi
-      if [ -f "$target" ] && [ ! -x "$target" ]; then
-        echo "restoring execute bit on claude ($target)..." >&2
-        $DRY_RUN_CMD /bin/chmod a+x "$target"
-      fi
-      # Re-check: command -v ignores non-executable files.
-      command -v claude >/dev/null 2>&1
-    }
-
-    if ensure_claude_x; then
-      echo "claude already available: $(command -v claude)" >&2
-    elif command -v brew >/dev/null 2>&1; then
-      echo "installing Claude Code via Homebrew cask..." >&2
-      $DRY_RUN_CMD brew install --cask claude-code
-      ensure_claude_x || echo "warning: claude still not executable after brew install" >&2
-    else
-      echo "brew not on PATH; cannot install claude-code cask" >&2
-    fi
+    export PATH="${config.home.homeDirectory}/.local/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
+    echo "installing/updating Claude Code via native installer..." >&2
+    $DRY_RUN_CMD bash -c 'curl -fsSL https://claude.ai/install.sh | bash' \
+      || echo "warning: native Claude Code installer failed" >&2
   '';
 }

@@ -153,9 +153,9 @@ PY
       /usr/bin/find /opt/homebrew -exec /bin/chmod -N {} + 2>/dev/null || true
       /bin/chmod -R go-w /opt/homebrew
 
-      # Some casks (e.g. claude-code) have landed in Caskroom as 644, so
-      # /opt/homebrew/bin/<name> resolves but shells report "permission denied".
-      # Restore +x on any Caskroom target linked from bin/.
+      # Some casks have landed in Caskroom as 644, so /opt/homebrew/bin/<name>
+      # resolves but shells report "permission denied". Restore +x on any
+      # Caskroom target linked from bin/.
       for link in /opt/homebrew/bin/*; do
         [ -L "$link" ] || continue
         target=$(/usr/bin/readlink "$link")
@@ -242,9 +242,6 @@ PY
     casks = [
       "ghostty"
       "tailscale-app"  # Homebrew renamed the Tailscale cask from "tailscale"
-      # Claude Code CLI (`claude` on PATH via /opt/homebrew/bin/claude).
-      # home.activation.ensureClaudeCode also reinstalls/fixes +x if missing.
-      "claude-code"
       # OpenAI Codex CLI (`codex` on PATH via /opt/homebrew/bin/codex).
       # home.nix alias: co = "codex --full-auto". Standalone installer under
       # ~/.local/bin is a fallback when sessionPath includes it.

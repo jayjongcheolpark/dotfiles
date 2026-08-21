@@ -128,10 +128,11 @@ Three pieces must all be present or Claude/codex `SessionStart` hooks die with `
 
 After a machine migration, `./rebuild.sh` rewrites the paths.d entry and home-manager zprofile; brew reinstalls `asdf` if zap removed it.
 
-**About `claude` (Claude Code CLI):** the `claude-code` Homebrew cask is in `configuration.nix` `homebrew.casks`, so nix-darwin installs it on switch.
-`home.nix` also runs `home.activation.ensureClaudeCode`: if `claude` is missing it runs `brew install --cask claude-code`, and if the cask binary landed without `+x` (zsh "permission denied") it restores the execute bit.
-`~/.local/bin` is on `home.sessionPath` so Anthropic's native installer path still works as a fallback.
-If you don't use Claude Code, remove `claude-code` from `casks` and drop `ensureClaudeCode` from `home.nix`.
+**About `claude` (Claude Code CLI):** installed with Anthropic's native installer, not Homebrew.
+`home.nix` `ensureClaudeCode` runs `curl -fsSL https://claude.ai/install.sh | bash` on each home-manager switch (idempotent; installs or updates `~/.local/bin/claude`).
+Login shells put `~/.local/bin` ahead of Homebrew so a leftover cask cannot shadow it.
+`homebrew.onActivation.cleanup = "zap"` will uninstall the old `claude-code` cask on the next switch because it is not in `casks`.
+If you don't use Claude Code, drop `ensureClaudeCode` from `home.nix`.
 
 **About `codex` (OpenAI Codex CLI):** the `codex` Homebrew cask is in `configuration.nix` `homebrew.casks`, so nix-darwin installs `/opt/homebrew/bin/codex` on switch.
 OpenAI's standalone installer may also put a binary at `~/.local/bin/codex`; that path is on `home.sessionPath`, but brew's `/opt/homebrew/bin` is the reliable install for every shell.
