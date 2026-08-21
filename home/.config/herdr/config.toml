@@ -18,6 +18,7 @@ copy_mode  = "prefix+y"  # herdr's copy-mode entry key; copy-mode's own internal
 agent_panel_sort = "spaces"
 
 show_agent_labels_on_pane_borders = true
+status_indicators = "symbols"
 [[keys.command]]
 key = "prefix+down"
 type = "plugin_action"
@@ -32,3 +33,7 @@ description = "open browser in right split"
 
 [ui.toast]
 delivery = "system"
+
+[theme]
+name = "catppuccin"
+auto_switch = false
