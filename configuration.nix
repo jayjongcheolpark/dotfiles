@@ -234,10 +234,10 @@ PY
       # MongoDB shell (constructease local/staging db work). Core formula;
       # pulls brew node as a dep — asdf shims stay first on PATH for `node`.
       "mongosh"
-      # Sentry CLI (releases, sourcemaps, debug files). Core formula.
-      "sentry-cli"
       # Microsoft Azure CLI (`az` on PATH). Core formula.
       "azure-cli"
+      # AWS CLI v2 (`aws` on PATH). Core formula.
+      "awscli"
     ];
     casks = [
       "ghostty"
@@ -246,6 +246,8 @@ PY
       # home.nix alias: co = "codex --full-auto". Standalone installer under
       # ~/.local/bin is a fallback when sessionPath includes it.
       "codex"
+      # Sentry CLI (`sentry-cli` on PATH). Moved from homebrew-core to a cask.
+      "sentry-cli"
       "1password"
       # Local Whisper dictation app (arm64, macOS 14+).
       "opensuperwhisper"
