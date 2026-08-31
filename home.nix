@@ -145,6 +145,8 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.pi/agent/models.json";
   home.file.".pi/agent/settings.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.pi/agent/settings.json";
+  home.file.".pi/agent/provider-failover.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.pi/agent/provider-failover.json";
 
   home.file.".claude/CLAUDE.md".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
@@ -188,5 +190,30 @@ in
     echo "installing/updating Claude Code via native installer..." >&2
     $DRY_RUN_CMD bash -c 'curl -fsSL https://claude.ai/install.sh | bash' \
       || echo "warning: native Claude Code installer failed" >&2
+  '';
+
+  # Official Pi CLI (`pi`). Prefer the curl installer, then npm. Skip Homebrew
+  # so updates are not stuck on the core formula.
+  home.activation.ensurePi = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    export PATH="${config.home.homeDirectory}/.asdf/shims:${config.home.homeDirectory}/.local/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
+    if command -v pi >/dev/null 2>&1; then
+      echo "pi already available: $(command -v pi)" >&2
+    elif command -v curl >/dev/null 2>&1; then
+      echo "installing Pi via native installer..." >&2
+      $DRY_RUN_CMD bash -c 'curl -fsSL https://pi.dev/install.sh | sh' \
+        || echo "warning: native Pi installer failed" >&2
+      if command -v asdf >/dev/null 2>&1; then
+        $DRY_RUN_CMD asdf reshim nodejs || true
+      fi
+    elif command -v npm >/dev/null 2>&1; then
+      echo "installing Pi via npm..." >&2
+      $DRY_RUN_CMD npm install -g --ignore-scripts @earendil-works/pi-coding-agent \
+        || echo "warning: Pi npm install failed" >&2
+      if command -v asdf >/dev/null 2>&1; then
+        $DRY_RUN_CMD asdf reshim nodejs || true
+      fi
+    else
+      echo "curl and npm not on PATH; cannot install Pi" >&2
+    fi
   '';
 }

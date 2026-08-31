@@ -16,12 +16,18 @@ result-*
 \{\{pkgetc\}\}/
 \{\{etc\}\}/
 
-# Pi credentials and Home Manager adoption backups stay local
+# Pi credentials, runtime caches, and Home Manager adoption backups stay local
 /home/.pi/agent/auth.json
 /home/.pi/agent/**/*.backup
+/home/.pi/agent/models-store.json
+/home/.pi/agent/provider-failover-state.json
+/home/.pi/agent/provider-failover-debug.log
 
 # Pi Calm is a runtime toggle; its local state file is never tracked
 /home/.pi/agent/calm
+
+# herdr writes this into Pi's extensions dir and overwrites it on update
+/home/.pi/agent/extensions/herdr-agent-state.ts
 
 # no-mistakes local validation state - never commit in this public repo
 .no-mistakes/
