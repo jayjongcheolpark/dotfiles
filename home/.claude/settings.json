@@ -1,5 +1,10 @@
 {
-  "model": "claude-fable-5[1m]",
+  "permissions": {
+    "allow": [
+      "Bash(av inject *)"
+    ]
+  },
+  "model": "claude-fable-5-1[1m]",
   "hooks": {
     "SessionStart": [
       {
@@ -61,5 +66,7 @@
   },
   "effortLevel": "medium",
   "skipDangerousModePermissionPrompt": true,
-  "theme": "dark-ansi"
+  "theme": "dark-ansi",
+  "editorMode": "vim",
+  "preferredNotifChannel": "ghostty"
 }

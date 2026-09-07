@@ -12,11 +12,14 @@
   "neverFailoverProviders": [],
   "providerOrder": [
     "anthropic",
+    "anthropic-account-2",
+    "anthropic-account-3",
     "openai-codex",
     "kimi-coding",
     "cursor",
     "qwen",
-    "ollama"
+    "ollama",
+    "xai"
   ],
   "cooldownMs": 21600000,
   "probeCooldownMs": 300000,
@@ -135,7 +138,7 @@
   "reasoningLevel": "auto",
   "preferredModels": {
     "anthropic": [
-      "claude-opus-5"
+      "claude-opus-4-8"
     ],
     "xai": [
       "grok-4.6"

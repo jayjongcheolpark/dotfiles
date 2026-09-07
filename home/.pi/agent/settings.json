@@ -18,5 +18,6 @@
     "npm:pi-multi-account"
   ],
   "defaultProvider": "anthropic",
-  "defaultModel": "claude-opus-4-8"
+  "defaultModel": "claude-opus-4-8",
+  "lastChangelogVersion": "0.84.4"
 }
