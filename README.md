@@ -16,7 +16,8 @@ If you find a bug, please open a GitHub Issue using the bug report template.
 Running the switch builds:
 
 - System settings (dark mode, key repeat, dock, Finder, trackpad, English + Korean preferred languages, Canadian keyboard + 2-Set Hangul, Remote Login/SSH)
-- Homebrew apps (casks and CLI tools: herdr, asdf, bun, uv, mongosh, sentry-cli, azure-cli, awscli, Claude Code, Codex, Crisp, OpenSuperWhisper, Ghostty, Tailscale, …)
+- Homebrew apps (casks and CLI tools: asdf, bun, uv, mongosh, sentry-cli, azure-cli, awscli, Claude Code, Codex, Crisp, OpenSuperWhisper, Ghostty, Tailscale, …)
+- Herdr CLI (official installer to `~/.local/bin/herdr`) plus the herdr-plus plugin
 - Nix user packages (ripgrep, fd, fzf, zoxide, jq, lazygit, gh, Neovim, Hack Nerd Font)
 - Shell (zsh with autosuggestions/completions, `z` via zoxide, aliases, starship prompt)
 - Editor (Neovim config with the rose-pine moon theme)
@@ -115,9 +116,11 @@ That means every time you switch, Homebrew removes any package or cask on your m
 If you already have Homebrew stuff installed that isn't in that list, the first switch will uninstall it.
 Read through `brews` and `casks` before you run `bootstrap.sh` or `rebuild.sh` for the first time, and add anything you want to keep.
 
-**About `herdr`:** it's in the `brews` list.
-It's a real public Homebrew formula (`brew info herdr` finds it in homebrew-core, no tap needed), so it will install fine.
-If you don't use it, just remove it from `brews` in your copy.
+**About `herdr`:** installed with Herdr's native installer, not Homebrew.
+`home.nix` `ensureHerdr` runs `curl -fsSL https://herdr.dev/install.sh | sh` on each home-manager switch (idempotent; installs or updates `~/.local/bin/herdr`).
+Login shells put `~/.local/bin` ahead of Homebrew so a leftover formula cannot shadow it.
+`homebrew.onActivation.cleanup = "zap"` will uninstall the old `herdr` formula on the next switch because it is not in `brews`.
+If you don't use herdr, drop `ensureHerdr` and `installHerdrPlugins` from `home.nix`.
 
 **About `asdf`:** also in `brews`. constructease (and `~/.tool-versions`) pin Node/bun/etc via asdf; without the formula listed, `homebrew.onActivation.cleanup = "zap"` uninstalls it on every switch.
 Three pieces must all be present or Claude/codex `SessionStart` hooks die with `node: command not found` / `exec: asdf: not found`:

@@ -36,7 +36,7 @@ in
   };
 
   # Grok CLI (installer used to drop this into a hand-written ~/.zshrc).
-  # ~/.local/bin: Anthropic native Claude Code (`claude`) and other installers.
+  # ~/.local/bin: native CLIs (`claude`, `herdr`) and other installers.
   # ~/.asdf/shims: asdf 0.16+ - shim → `asdf exec`; brew puts `asdf` on PATH.
   home.sessionPath = [
     "${config.home.homeDirectory}/.asdf/shims"
@@ -74,7 +74,7 @@ in
       if [ -x /opt/homebrew/bin/brew ]; then
         eval "$(/opt/homebrew/bin/brew shellenv)"
       fi
-      # Native CLIs (claude) ahead of Homebrew so a leftover cask cannot shadow.
+      # Native CLIs (claude, herdr) ahead of Homebrew so leftover formulae cannot shadow.
       export PATH="$HOME/.local/bin:$PATH"
       # asdf 0.16+: no need to source asdf.sh - shims + brew `asdf` are enough.
       export ASDF_DATA_DIR="''${ASDF_DATA_DIR:-$HOME/.asdf}"
@@ -155,12 +155,22 @@ in
   home.file.".config/opencode/AGENTS.md".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
 
+  # Native herdr CLI (`~/.local/bin/herdr`). Prefer the official installer
+  # over Homebrew so updates are not stuck on the core formula. Re-running
+  # is idempotent and pulls the latest stable.
+  home.activation.ensureHerdr = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    export PATH="${config.home.homeDirectory}/.local/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
+    echo "installing/updating herdr via native installer..." >&2
+    $DRY_RUN_CMD bash -c 'curl -fsSL https://herdr.dev/install.sh | sh' \
+      || echo "warning: native herdr installer failed" >&2
+  '';
+
   # Install herdr plugins that are declared above but not yet registered.
-  # herdr itself is a Homebrew brew (see configuration.nix); brew may not be
-  # on activation PATH, so pin the common prefixes.
+  # herdr is installed to ~/.local/bin by ensureHerdr; pin that plus brew
+  # prefixes so activation PATH can find it.
   # Idempotent: skips when the plugin_id is already enabled.
-  home.activation.installHerdrPlugins = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+  home.activation.installHerdrPlugins = lib.hm.dag.entryAfter [ "ensureHerdr" ] ''
+    export PATH="${config.home.homeDirectory}/.local/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
     if ! command -v herdr >/dev/null 2>&1; then
       echo "herdr not on PATH; skip herdr plugin install" >&2
     else

@@ -224,7 +224,6 @@ PY
       }
     ];
     brews = [
-      "herdr"
       "bun"  # JS runtime / package manager (e.g. constructease/app)
       "uv"   # Python package and project manager
       # Version manager for constructease (.tool-versions: nodejs, bun, …).
