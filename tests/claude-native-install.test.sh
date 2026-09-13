@@ -14,6 +14,14 @@ assert_contains "$home_nix" "https://claude.ai/install.sh" \
   "home.nix ensureClaudeCode must use the native installer URL"
 assert_not_contains "$home_nix" "brew install --cask claude-code" \
   "home.nix must not install Claude Code via Homebrew"
+assert_contains "$home_nix" 'CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING = "1"' \
+  "home.nix must pin CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING as a session variable"
+assert_contains "$home_nix" 'CLAUDE_CODE_DISABLE_AUTO_MEMORY = "1"' \
+  "home.nix must pin CLAUDE_CODE_DISABLE_AUTO_MEMORY as a session variable"
+assert_contains "$home_nix" 'CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY = "1"' \
+  "home.nix must pin CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY as a session variable"
+assert_contains "$home_nix" 'CLAUDE_CODE_AUTO_COMPACT_WINDOW = "500000"' \
+  "home.nix must pin CLAUDE_CODE_AUTO_COMPACT_WINDOW as a session variable"
 
 readme=$(cat "$ROOT/README.md")
 assert_contains "$readme" "claude.ai/install.sh" \

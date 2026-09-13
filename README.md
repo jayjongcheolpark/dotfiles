@@ -136,6 +136,7 @@ After a machine migration, `./rebuild.sh` rewrites the paths.d entry and home-ma
 Login shells put `~/.local/bin` ahead of Homebrew so a leftover cask cannot shadow it.
 `homebrew.onActivation.cleanup = "zap"` will uninstall the old `claude-code` cask on the next switch because it is not in `casks`.
 If you don't use Claude Code, drop `ensureClaudeCode` from `home.nix`.
+Behavior toggles (`CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING`, `CLAUDE_CODE_DISABLE_AUTO_MEMORY`, `CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY`, `CLAUDE_CODE_AUTO_COMPACT_WINDOW`) are `home.sessionVariables` in `home.nix`, not `~/.claude/settings.json`, so Claude rewriting that file cannot regress them.
 
 **About `codex` (OpenAI Codex CLI):** the `codex` Homebrew cask is in `configuration.nix` `homebrew.casks`, so nix-darwin installs `/opt/homebrew/bin/codex` on switch.
 OpenAI's standalone installer may also put a binary at `~/.local/bin/codex`; that path is on `home.sessionPath`, but brew's `/opt/homebrew/bin` is the reliable install for every shell.

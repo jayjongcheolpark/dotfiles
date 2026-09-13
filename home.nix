@@ -33,6 +33,13 @@ in
     # asdf 0.16+ (Homebrew formula) stores plugins/installs here. Keep it
     # out of zshrc-only so non-interactive zsh (and hm-session-vars) see it.
     ASDF_DATA_DIR = "${config.home.homeDirectory}/.asdf";
+
+    # Claude Code behavior toggles. Set as shell env vars (not ~/.claude/settings.json)
+    # so Claude rewriting settings.json can't regress them.
+    CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING = "1";
+    CLAUDE_CODE_DISABLE_AUTO_MEMORY = "1";
+    CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY = "1";
+    CLAUDE_CODE_AUTO_COMPACT_WINDOW = "500000";
   };
 
   # Grok CLI (installer used to drop this into a hand-written ~/.zshrc).
