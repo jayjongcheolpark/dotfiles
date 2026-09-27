@@ -140,10 +140,9 @@ Behavior toggles (`CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING`, `CLAUDE_CODE_DISABLE_
 
 **About `gksdud`:** Korean/English input switching. The cask `codingnoye/tap/gksdud` and the tap `codingnoye/tap` are in `configuration.nix`. Caps Lock is the switch key and sends F19. macOS "Use Caps Lock to switch to and from ABC" is off (`TISRomanSwitchState = 0`), because that Caps Lock action would fire alongside gksdud. Activation does not turn on the old previous/next input-source hotkeys. If hotkey 60 is still the stock chord, activation turns that entry off. gksdud writes the F19 remap itself.
 
-Two steps stay manual, once per machine. The config cannot do them:
+gksdud is self-signed and not notarized. `onActivation.extraFlags` includes `--force`, so every rebuild reinstalls the cask and macOS sets a fresh `com.apple.quarantine` attribute on `/Applications/gksdud.app`. Activation clears that attribute after the Homebrew bundle step, so the first-launch Gatekeeper approval is no longer needed after a rebuild.
 
-1. First launch. This build is self-signed and not notarized, so Gatekeeper may block it. If it does, open gksdud from Finder (right-click, then Open), or allow it under System Settings → Privacy & Security.
-2. Accessibility. System Settings → Privacy & Security → Accessibility, then enable gksdud. Without that permission, the key press does not switch input.
+Accessibility permission is still required once per machine. System Settings → Privacy & Security → Accessibility, then enable gksdud. Without that permission, the key press does not switch input.
 
 **About `codex` (OpenAI Codex CLI):** the `codex` Homebrew cask is in `configuration.nix` `homebrew.casks`, so nix-darwin installs `/opt/homebrew/bin/codex` on switch.
 OpenAI's standalone installer may also put a binary at `~/.local/bin/codex`; that path is on `home.sessionPath`, but brew's `/opt/homebrew/bin` is the reliable install for every shell.

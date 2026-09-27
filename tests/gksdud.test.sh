@@ -42,6 +42,15 @@ assert_not_contains "$prefs" "updates." \
 assert_contains "$config" "TISRomanSwitchState = 0" \
   "Caps Lock ABC switch must stay off"
 
+assert_contains "$config" 'extraFlags = [ "--force" ]' \
+  "homebrew onActivation must keep --force"
+assert_not_contains "$config" "no_quarantine" \
+  "configuration must not disable quarantine for every cask"
+assert_contains "$config" 'if [ -e /Applications/gksdud.app ]; then' \
+  "a missing gksdud app must not fail activation"
+assert_contains "$config" 'sudo -u ${user} /usr/bin/xattr -dr com.apple.quarantine /Applications/gksdud.app' \
+  "activation must clear quarantine on /Applications/gksdud.app as the Homebrew user"
+
 # Comments may name F19. The Python writer must not hardcode that remap,
 # and it must not turn the stock previous-input-source chord back on.
 hotkey=$(sed -n "/<<'PY'/,/^PY$/p" "$ROOT/configuration.nix")
@@ -59,8 +68,12 @@ assert_not_contains "$config" '("60", "61")' \
 readme=$(cat "$ROOT/README.md")
 assert_contains "$readme" "Accessibility" \
   "README must document the manual Accessibility grant"
+assert_contains "$readme" "once per machine" \
+  "README must say Accessibility permission is still once per machine"
 assert_contains "$readme" "not notarized" \
-  "README must document the first-launch Gatekeeper allow"
+  "README must say gksdud is self-signed and not notarized"
+assert_contains "$readme" "no longer needed after a rebuild" \
+  "README must say Gatekeeper approval is no longer needed after a rebuild"
 assert_not_contains "$config" "Ctrl+Space" \
   "configuration.nix must describe gksdud Caps Lock to F19, not Ctrl+Space"
 assert_not_contains "$readme" "Ctrl+Space" \
