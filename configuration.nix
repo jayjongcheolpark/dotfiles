@@ -132,6 +132,15 @@
   # registers the sources. Hotkey 60 belongs to gksdud; this script does
   # not write that F19 remap and does not turn the stock chord back on.
   system.activationScripts.postActivation.text = ''
+    # gksdud is self-signed and not notarized. --force reinstalls the cask
+    # on every rebuild, which sets a fresh com.apple.quarantine attribute.
+    # This phase runs after the Homebrew bundle step. Only this app; a
+    # missing bundle is not an error. The Homebrew user owns the app.
+    if [ -e /Applications/gksdud.app ]; then
+      echo "clearing quarantine on /Applications/gksdud.app..." >&2
+      sudo -u ${user} /usr/bin/xattr -dr com.apple.quarantine /Applications/gksdud.app
+    fi
+
     echo "enabling Korean 2-Set Hangul + Canadian input sources..." >&2
     # Activation runs as root; TIS and user prefs must run as the desktop user.
     sudo -u ${user} /usr/bin/swift /Users/${user}/.dotfiles/scripts/enable-korean-input.swift 2>&1 || true
@@ -290,7 +299,7 @@ PY
       # Crisp desktop app from the didriksg Homebrew tap.
       "didriksg/tap/crisp"
       # Korean/English switch. Caps Lock sends F19. Preferences are above.
-      # Accessibility and the first-launch Gatekeeper allow are manual (README).
+      # Accessibility stays manual, once per machine (README).
       "codingnoye/tap/gksdud"
     ];
   };
