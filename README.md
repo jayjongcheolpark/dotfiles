@@ -15,8 +15,8 @@ If you find a bug, please open a GitHub Issue using the bug report template.
 
 Running the switch builds:
 
-- System settings (dark mode, key repeat, dock, Finder, trackpad, English + Korean preferred languages, Canadian keyboard + 2-Set Hangul, Remote Login/SSH)
-- Homebrew apps (casks and CLI tools: asdf, bun, uv, mongosh, sentry-cli, azure-cli, awscli, Claude Code, Codex, Crisp, OpenSuperWhisper, Ghostty, Tailscale, …)
+- System settings (dark mode, key repeat, dock, Finder, trackpad, English + Korean preferred languages, Canadian keyboard + 2-Set Hangul, gksdud Caps Lock to F19, Remote Login/SSH)
+- Homebrew apps (casks and CLI tools: asdf, bun, uv, mongosh, sentry-cli, azure-cli, awscli, Claude Code, Codex, Crisp, gksdud, OpenSuperWhisper, Ghostty, Tailscale, …)
 - Herdr CLI (official installer to `~/.local/bin/herdr`) plus the herdr-plus plugin
 - Nix user packages (ripgrep, fd, fzf, zoxide, jq, lazygit, gh, Neovim, Hack Nerd Font)
 - Shell (zsh with autosuggestions/completions, `z` via zoxide, aliases, starship prompt)
@@ -137,6 +137,13 @@ Login shells put `~/.local/bin` ahead of Homebrew so a leftover cask cannot shad
 `homebrew.onActivation.cleanup = "zap"` will uninstall the old `claude-code` cask on the next switch because it is not in `casks`.
 If you don't use Claude Code, drop `ensureClaudeCode` from `home.nix`.
 Behavior toggles (`CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING`, `CLAUDE_CODE_DISABLE_AUTO_MEMORY`, `CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY`, `CLAUDE_CODE_AUTO_COMPACT_WINDOW`) are `home.sessionVariables` in `home.nix`, not `~/.claude/settings.json`, so Claude rewriting that file cannot regress them.
+
+**About `gksdud`:** Korean/English input switching. The cask `codingnoye/tap/gksdud` and the tap `codingnoye/tap` are in `configuration.nix`. Caps Lock is the switch key and sends F19. macOS "Use Caps Lock to switch to and from ABC" is off (`TISRomanSwitchState = 0`), because that Caps Lock action would fire alongside gksdud. Activation does not turn on the old previous/next input-source hotkeys. If hotkey 60 is still the stock chord, activation turns that entry off. gksdud writes the F19 remap itself.
+
+Two steps stay manual, once per machine. The config cannot do them:
+
+1. First launch. This build is self-signed and not notarized, so Gatekeeper may block it. If it does, open gksdud from Finder (right-click, then Open), or allow it under System Settings → Privacy & Security.
+2. Accessibility. System Settings → Privacy & Security → Accessibility, then enable gksdud. Without that permission, the key press does not switch input.
 
 **About `codex` (OpenAI Codex CLI):** the `codex` Homebrew cask is in `configuration.nix` `homebrew.casks`, so nix-darwin installs `/opt/homebrew/bin/codex` on switch.
 OpenAI's standalone installer may also put a binary at `~/.local/bin/codex`; that path is on `home.sessionPath`, but brew's `/opt/homebrew/bin` is the reliable install for every shell.

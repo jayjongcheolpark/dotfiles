@@ -64,6 +64,9 @@
       NSGlobalDomain = {
         AppleLanguages = [ "en-CA" "ko" ];
         AppleLocale = "en_CA";
+        # Off. Caps Lock is gksdud's switch key; the macOS
+        # "switch to ABC" Caps Lock action would fire as well.
+        TISRomanSwitchState = 0;
       };
       "com.apple.TextInputMenu" = {
         visible = 1;  # Show Input menu in menu bar
@@ -102,38 +105,65 @@
           }
         ];
       };
+      # gksdud user choices only (domain io.gksdud.inputswitch).
+      # source is Caps Lock, HID usage 0x700000039, stored as a string.
+      # target F19 is what the app emits. It rewrites symbolic hotkey 60
+      # itself; do not copy that remap here. Leave its runtime bookkeeping
+      # (records, knownKeyboards, keyboardRecordsBoot, original*, *BackedUp,
+      # managedShortcutKeyCode, updates.*) for the app to write per machine.
+      "io.gksdud.inputswitch" = {
+        active = true;
+        iconStyle = 2;
+        source = "30064771129";
+        target = "F19";
+      };
     };
   };
 
   # HIToolbox defaults alone do not fully register Input Methods for the
   # menu bar / switcher on modern macOS. After defaults are written:
   #  1) enable Canadian + 2-Set Hangul via Carbon TIS APIs
-  #  2) turn on Ctrl+Space input-source hotkeys (off by default)
+  #  2) drop the stock previous-input-source chord on hotkey 60 if it is
+  #     still there, so it does not compete with gksdud
   #  3) bounce text-input agents
   # System Settings → Input Sources often still only lists keyboard *layouts*
-  # (Canadian) and omits *input methods* (Korean) — use the menu bar or
-  # Ctrl+Space instead; `scripts/enable-korean-input.swift` is authoritative.
+  # (Canadian) and omits *input methods* (Korean). gksdud switches on
+  # Caps Lock and sends F19. `scripts/enable-korean-input.swift` only
+  # registers the sources. Hotkey 60 belongs to gksdud; this script does
+  # not write that F19 remap and does not turn the stock chord back on.
   system.activationScripts.postActivation.text = ''
     echo "enabling Korean 2-Set Hangul + Canadian input sources..." >&2
     # Activation runs as root; TIS and user prefs must run as the desktop user.
     sudo -u ${user} /usr/bin/swift /Users/${user}/.dotfiles/scripts/enable-korean-input.swift 2>&1 || true
 
-    echo "enabling Ctrl+Space input source hotkeys..." >&2
-    # 60 = previous source (Ctrl+Space), 61 = next (Ctrl+Opt+Space).
+    echo "clearing the stock previous-input-source hotkey if gksdud has not remapped it..." >&2
+    # 60 = select previous input source. gksdud owns this slot and remaps
+    # it to F19. Disable the entry only while its parameters are still the
+    # stock chord (character 32, key code 49, modifier 262144). Leave a
+    # gksdud remap untouched, and do not write the F19 parameters here.
+    # 61 is not enabled either; this used to force both on.
     # PlistBuddy is unreliable with int-keyed dicts; use defaults export/import.
     sudo -u ${user} /usr/bin/python3 - <<'PY' || true
 import plistlib, subprocess, tempfile, os
 raw = subprocess.check_output(["defaults", "export", "com.apple.symbolichotkeys", "-"])
 pl = plistlib.loads(raw)
 keys = pl.setdefault("AppleSymbolicHotKeys", {})
+stock = [32, 49, 262144]
+changed = False
 for k in list(keys.keys()):
-    if str(k) in ("60", "61"):
-        keys[k]["enabled"] = True
-with tempfile.NamedTemporaryFile(suffix=".plist", delete=False) as f:
-    plistlib.dump(pl, f)
-    tmp = f.name
-subprocess.check_call(["defaults", "import", "com.apple.symbolichotkeys", tmp])
-os.unlink(tmp)
+    if str(k) != "60":
+        continue
+    entry = keys[k]
+    params = list((entry.get("value") or {}).get("parameters") or [])
+    if params == stock and entry.get("enabled") is not False:
+        entry["enabled"] = False
+        changed = True
+if changed:
+    with tempfile.NamedTemporaryFile(suffix=".plist", delete=False) as f:
+        plistlib.dump(pl, f)
+        tmp = f.name
+    subprocess.check_call(["defaults", "import", "com.apple.symbolichotkeys", tmp])
+    os.unlink(tmp)
 PY
     sudo -u ${user} /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u 2>/dev/null || true
 
@@ -215,11 +245,15 @@ PY
     onActivation.cleanup = "zap";  # remove anything not listed here
     onActivation.autoUpdate = true;
     onActivation.extraFlags = [ "--force" ];
-    # Third-party tap for Automic Vault (not in homebrew-cask core).
+    # Third-party taps (not in homebrew-cask core).
     # trusted = true is required under Homebrew's tap-trust rules during activation.
     taps = [
       {
         name = "automic-vault/isotopes";
+        trusted = true;
+      }
+      {
+        name = "codingnoye/tap";
         trusted = true;
       }
     ];
@@ -255,6 +289,9 @@ PY
       "automic-vault/isotopes/automic-vault"
       # Crisp desktop app from the didriksg Homebrew tap.
       "didriksg/tap/crisp"
+      # Korean/English switch. Caps Lock sends F19. Preferences are above.
+      # Accessibility and the first-launch Gatekeeper allow are manual (README).
+      "codingnoye/tap/gksdud"
     ];
   };
 }
