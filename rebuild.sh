@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+# Pin while ~/.config/herdr still resolves through the current ~/.dotfiles.
+# The ln below is what moves that path; activation runs too late to see the
+# running server's socket, session.json, or session-backups.
+bash "$DIR/scripts/keep-herdr-socket.sh"
 ln -sfn "$DIR" ~/.dotfiles
 
 # sudo uses a secure PATH that does not include /run/current-system/sw/bin,

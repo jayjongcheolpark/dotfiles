@@ -138,8 +138,13 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/ghostty";
   home.file.".config/nvim".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/nvim";
-  home.file.".config/herdr".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/herdr";
+  # Authored files only. The socket, session, and installed plugins stay in
+  # ~/.local/herdr (see keepHerdrSocket). Linking this whole directory would
+  # put herdr.sock behind ~/.dotfiles, which rebuild.sh retargets on every run.
+  home.file.".config/herdr/config.toml".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/herdr/config.toml";
+  home.file.".config/herdr/plugins/config".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/herdr/plugins/config";
   home.file.".claude/settings.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude/settings.json";
 
@@ -161,6 +166,13 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
   home.file.".config/opencode/AGENTS.md".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
+
+  # rebuild.sh pins the socket before it retargets ~/.dotfiles. This hook
+  # covers a switch that has not retargeted yet, and keeps checkLinkTargets
+  # from backing authored files up through the old symlink.
+  home.activation.keepHerdrSocket = lib.hm.dag.entryBefore [ "checkLinkTargets" ] ''
+    $DRY_RUN_CMD bash "${./scripts/keep-herdr-socket.sh}"
+  '';
 
   # Native herdr CLI (`~/.local/bin/herdr`). Prefer the official installer
   # over Homebrew so updates are not stuck on the core formula. Re-running
