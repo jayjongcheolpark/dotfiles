@@ -8,10 +8,12 @@
 # path out from under the running server, and the next `herdr server` binds a
 # fresh empty one.
 #
-# This runs before Home Manager's link check. It points ~/.config/herdr at
-# $HOME/.local/herdr, which rebuild.sh does not retarget. A live socket is
-# hardlinked into that directory before the symlink is swapped, so the path
-# the running server already bound keeps reaching the same inode.
+# rebuild.sh must run this before `ln -sfn ~/.dotfiles`. After that ln,
+# realpath(~/.config/herdr) is the new checkout and the live socket is no
+# longer visible. Home Manager activation runs it again; once pinned, that
+# second run is a no-op. A live socket is hardlinked into ~/.local/herdr
+# before the symlink is swapped, and session.json plus session-backups are
+# copied from the directory the socket still resolves to.
 set -euo pipefail
 
 config_root="${XDG_CONFIG_HOME:-$HOME/.config}"

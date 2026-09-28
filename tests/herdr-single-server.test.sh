@@ -26,6 +26,11 @@ assert_not_contains "$home_nix" 'herdr server' \
 script="$ROOT/scripts/keep-herdr-socket.sh"
 [[ -f "$script" ]] || fail "scripts/keep-herdr-socket.sh is missing"
 
+pin_line=$(awk '/keep-herdr-socket\.sh/{print NR; exit}' "$ROOT/rebuild.sh")
+ln_line=$(awk '/ln -sfn "\$DIR" ~\/\.dotfiles/{print NR; exit}' "$ROOT/rebuild.sh")
+[[ -n "$pin_line" && -n "$ln_line" && "$pin_line" -lt "$ln_line" ]] \
+  || fail "rebuild.sh must pin the herdr socket before it retargets ~/.dotfiles"
+
 listener_pid=
 finish() {
   if [[ -n "${listener_pid:-}" ]]; then
@@ -45,9 +50,15 @@ root=$(TMPDIR=/tmp dotfiles_test_tmproot hst)
 trap finish EXIT
 repo_a="$root/repo-a/home/.config/herdr"
 repo_b="$root/repo-b/home/.config/herdr"
-mkdir -p "$repo_a/plugins/github/demo" "$repo_b" "$root/home/.config" "$root/home/.dotfiles-parent"
+mkdir -p "$repo_a/plugins/github/demo" "$repo_a/session-backups" \
+  "$repo_b/session-backups" "$root/home/.config" "$root/home/.dotfiles-parent"
 printf 'session-a\n' > "$repo_a/session.json"
+printf 'backup-a\n' > "$repo_a/session-backups/fleet"
 printf 'plugin\n' > "$repo_a/plugins/github/demo/marker"
+# The new checkout has different runtime files. A pin that runs after the
+# retarget would copy these and miss the live socket.
+printf 'session-b\n' > "$repo_b/session.json"
+printf 'backup-b\n' > "$repo_b/session-backups/other"
 ln -s "$root/repo-a" "$root/home/.dotfiles"
 # Same chain as Home Manager: ~/.config/herdr -> store symlink -> ~/.dotfiles/...
 ln -s "$root/home/.dotfiles/home/.config/herdr" "$root/store-herdr"
@@ -101,23 +112,29 @@ HOME="$root/home" bash "$script"
 [[ "$(stat -f %i "$root/home/.config/herdr/herdr.sock")" == "$(stat -f %i "$repo_a/herdr.sock")" ]] \
   || fail "pinned socket must be the same inode as the running server"
 [[ "$(cat "$root/home/.local/herdr/session.json")" == "session-a" ]] \
-  || fail "session.json must be copied into the stable directory"
+  || fail "session.json must be copied from the old target"
+[[ "$(cat "$root/home/.local/herdr/session-backups/fleet")" == "backup-a" ]] \
+  || fail "session-backups must be copied from the old target"
 [[ -f "$root/home/.local/herdr/plugins/github/demo/marker" ]] \
   || fail "installed plugins must be copied into the stable directory"
 ping "$root/home/.config/herdr/herdr.sock" \
   || fail "pinned socket was not reachable"
 
-# rebuild.sh does this. The running server must still answer.
+# rebuild.sh order: pin, then retarget ~/.dotfiles, then activation runs the
+# same script again. The second run must not pick up the new checkout.
 ln -sfn "$root/repo-b" "$root/home/.dotfiles"
+HOME="$root/home" bash "$script"
+[[ "$(readlink "$root/home/.config/herdr")" == "$root/home/.local/herdr" ]] \
+  || fail "activation after retarget must leave the pin in place"
+[[ "$(cat "$root/home/.local/herdr/session.json")" == "session-a" ]] \
+  || fail "activation after retarget must keep the old session.json"
+[[ "$(cat "$root/home/.local/herdr/session-backups/fleet")" == "backup-a" ]] \
+  || fail "activation after retarget must keep the old session-backups"
+[[ ! -e "$root/home/.local/herdr/session-backups/other" ]] \
+  || fail "activation after retarget must not import the new checkout's backups"
 ping "$root/home/.config/herdr/herdr.sock" \
   || fail "retargeting ~/.dotfiles dropped the running socket"
 [[ ! -S "$repo_b/herdr.sock" ]] || fail "retarget created a socket in the new repo"
-
-HOME="$root/home" bash "$script"
-[[ "$(readlink "$root/home/.config/herdr")" == "$root/home/.local/herdr" ]] \
-  || fail "second run must leave the pin in place"
-ping "$root/home/.config/herdr/herdr.sock" \
-  || fail "second run disturbed the running socket"
 
 # An already-real config directory is stable and must be left alone.
 real_home="$root/real-home"

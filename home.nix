@@ -167,9 +167,9 @@ in
   home.file.".config/opencode/AGENTS.md".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
 
-  # Before Home Manager replaces links: lift a running socket out of the
-  # ~/.dotfiles symlink. checkLinkTargets would otherwise see authored files
-  # through that symlink and try to back them up inside the repo.
+  # rebuild.sh pins the socket before it retargets ~/.dotfiles. This hook
+  # covers a switch that has not retargeted yet, and keeps checkLinkTargets
+  # from backing authored files up through the old symlink.
   home.activation.keepHerdrSocket = lib.hm.dag.entryBefore [ "checkLinkTargets" ] ''
     $DRY_RUN_CMD bash "${./scripts/keep-herdr-socket.sh}"
   '';
