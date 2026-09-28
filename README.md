@@ -149,7 +149,8 @@ OpenAI's standalone installer may also put a binary at `~/.local/bin/codex`; tha
 If you don't use Codex, remove `codex` from `casks` and the `co` alias from `home.nix`.
 
 **About `herdr-plus`:** the plugin is declared in `home.nix` (`herdrPlugins`) and installed on home-manager activation when missing (`herdr plugin install cloudmanic/herdr-plus --yes`).
-Authored plugin config (worktree auto-layout, quick-actions) lives under `home/.config/herdr/plugins/config/cloudmanic.herdr-plus/`; the installed package under `plugins/github/` is gitignored.
+Authored plugin config (worktree auto-layout, quick-actions) lives under `home/.config/herdr/plugins/config/cloudmanic.herdr-plus/` and is symlinked into the home directory.
+The socket, session, and installed package stay in `~/.local/herdr`, with `~/.config/herdr` pointing there. `rebuild.sh` retargets `~/.dotfiles` on every run; the running server stays reachable because its socket is not behind that symlink.
 To add another herdr plugin later, append its `owner/repo` to `herdrPlugins` and put config under `plugins/config/<owner>.<repo>/`.
 
 **Heads-up:**

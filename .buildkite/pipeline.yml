@@ -24,7 +24,7 @@ steps:
       }
       # -x follows `. tests/lib.sh` so sourced definitions are analysed too.
       nix run 'github:NixOS/nixpkgs/nixpkgs-26.05-darwin#shellcheck' -- \
-        -x bootstrap.sh rebuild.sh tests/lib.sh tests/pi-calm.test.sh
+        -x bootstrap.sh rebuild.sh scripts/keep-herdr-socket.sh tests/lib.sh tests/pi-calm.test.sh
 
   - label: ":test_tube: tests"
     key: tests
