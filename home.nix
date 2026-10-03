@@ -24,6 +24,10 @@ in
     lazygit
     gh        # GitHub CLI
     neovim
+    # Rust toolchain from the pinned nixpkgs (stable, >= 1.88).
+    # `cargo install` puts binaries in ~/.cargo/bin (see sessionPath).
+    rustc
+    cargo
     # the font everything renders in
     nerd-fonts.hack
   ];
@@ -45,7 +49,9 @@ in
   # Grok CLI (installer used to drop this into a hand-written ~/.zshrc).
   # ~/.local/bin: native CLIs (`claude`, `herdr`) and other installers.
   # ~/.asdf/shims: asdf 0.16+ - shim → `asdf exec`; brew puts `asdf` on PATH.
+  # ~/.cargo/bin: binaries from `cargo install`.
   home.sessionPath = [
+    "${config.home.homeDirectory}/.cargo/bin"
     "${config.home.homeDirectory}/.asdf/shims"
     "${config.home.homeDirectory}/.grok/bin"
     "${config.home.homeDirectory}/.local/bin"
