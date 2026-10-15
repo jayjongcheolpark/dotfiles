@@ -273,6 +273,10 @@ PY
       # Data/plugins stay in ~/.asdf; without this entry, onActivation.cleanup
       # = "zap" removes asdf on every switch.
       "asdf"
+      # asdf Python 3.13.2 links /opt/homebrew/opt/gettext/lib/libintl.8.dylib.
+      # Without this entry, onActivation.cleanup = "zap" removes gettext and
+      # python3 fails to start.
+      "gettext"
       # MongoDB shell (constructease local/staging db work). Core formula;
       # pulls brew node as a dep — asdf shims stay first on PATH for `node`.
       "mongosh"
