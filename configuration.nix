@@ -284,6 +284,8 @@ PY
     casks = [
       "ghostty"
       "tailscale-app"  # Homebrew renamed the Tailscale cask from "tailscale"
+      # Cloudflare WARP (Zero Trust). Gilfoyle is reachable only over WARP.
+      "cloudflare-warp"
       # OpenAI Codex CLI (`codex` on PATH via /opt/homebrew/bin/codex).
       # home.nix alias: co = "codex --full-auto". Standalone installer under
       # ~/.local/bin is a fallback when sessionPath includes it.
