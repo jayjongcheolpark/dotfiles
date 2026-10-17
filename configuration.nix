@@ -307,6 +307,8 @@ PY
       # Korean/English switch. Caps Lock sends F19. Preferences are above.
       # Accessibility stays manual, once per machine (README).
       "codingnoye/tap/gksdud"
+      # Minimal GUI for AI code agents (https://t3.codes/).
+      "t3-code"
     ];
   };
 }
