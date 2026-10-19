@@ -284,6 +284,11 @@ PY
       "azure-cli"
       # AWS CLI v2 (`aws` on PATH). Core formula.
       "awscli"
+      # Java 11+ for constructease TLA+ TLC
+      # (.agents/skills/verify-import-credential-lock/verify.sh).
+      # Keg-only; that script uses /opt/homebrew/opt/openjdk@21/bin/java.
+      # Without this entry, onActivation.cleanup = "zap" removes it.
+      "openjdk@21"
     ];
     casks = [
       "ghostty"
