@@ -47,6 +47,164 @@
           }
         ]
       }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/sh",
+            "args": [
+              "/Users/jaypark/.claude-remote/http/hook.sh",
+              "--from=claude-remote"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/sh",
+            "args": [
+              "/Users/jaypark/.claude-remote/http/hook.sh",
+              "--from=claude-remote"
+            ],
+            "timeout": 135
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "AskUserQuestion",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/sh",
+            "args": [
+              "/Users/jaypark/.claude-remote/http/hook.sh",
+              "--from=claude-remote"
+            ],
+            "timeout": 135
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/sh",
+            "args": [
+              "/Users/jaypark/.claude-remote/http/hook.sh",
+              "--from=claude-remote"
+            ],
+            "timeout": 5,
+            "async": true
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/sh",
+            "args": [
+              "/Users/jaypark/.claude-remote/http/hook.sh",
+              "--from=claude-remote"
+            ],
+            "timeout": 5,
+            "async": true
+          }
+        ]
+      }
+    ],
+    "PermissionDenied": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/sh",
+            "args": [
+              "/Users/jaypark/.claude-remote/http/hook.sh",
+              "--from=claude-remote"
+            ],
+            "timeout": 5,
+            "async": true
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/sh",
+            "args": [
+              "/Users/jaypark/.claude-remote/http/hook.sh",
+              "--from=claude-remote"
+            ],
+            "timeout": 5,
+            "async": true
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/sh",
+            "args": [
+              "/Users/jaypark/.claude-remote/http/hook.sh",
+              "--from=claude-remote"
+            ],
+            "timeout": 5,
+            "async": true
+          }
+        ]
+      }
+    ],
+    "StopFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/sh",
+            "args": [
+              "/Users/jaypark/.claude-remote/http/hook.sh",
+              "--from=claude-remote"
+            ],
+            "timeout": 5,
+            "async": true
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/sh",
+            "args": [
+              "/Users/jaypark/.claude-remote/http/hook.sh",
+              "--from=claude-remote"
+            ],
+            "timeout": 5,
+            "async": true
+          }
+        ]
+      }
     ]
   },
   "statusLine": {

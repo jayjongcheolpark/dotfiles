@@ -289,6 +289,10 @@ PY
       # Keg-only; that script uses /opt/homebrew/opt/openjdk@21/bin/java.
       # Without this entry, onActivation.cleanup = "zap" removes it.
       "openjdk@21"
+      # claude-remote: tmux for terminal sessions it launches, cloudflared for its
+      # quick tunnel (LaunchAgent pins /opt/homebrew/bin/cloudflared). Core formulae.
+      "tmux"
+      "cloudflared"
     ];
     casks = [
       "ghostty"
