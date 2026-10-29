@@ -16,7 +16,7 @@ If you find a bug, please open a GitHub Issue using the bug report template.
 Running the switch builds:
 
 - System settings (dark mode, key repeat, dock, Finder, trackpad, English + Korean preferred languages, Canadian keyboard + 2-Set Hangul, gksdud Caps Lock to F19, Remote Login/SSH)
-- Homebrew apps (casks and CLI tools: asdf, bun, uv, mongosh, sentry-cli, azure-cli, awscli, Claude Code, Codex, Crisp, gksdud, OpenSuperWhisper, Ghostty, Tailscale, …)
+- Homebrew apps (casks and CLI tools: asdf, bun, uv, mongosh, mole, sentry-cli, azure-cli, awscli, Claude Code, Codex, Crisp, gksdud, OpenSuperWhisper, Ghostty, Tailscale, …)
 - Herdr CLI (official installer to `~/.local/bin/herdr`) plus the herdr-plus plugin
 - Nix user packages (ripgrep, fd, fzf, zoxide, jq, lazygit, gh, Neovim, Rust toolchain (`rustc`, `cargo`; `cargo install` binaries in `~/.cargo/bin`), Hack Nerd Font)
 - Shell (zsh with autosuggestions/completions, `z` via zoxide, aliases, starship prompt)

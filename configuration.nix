@@ -293,6 +293,9 @@ PY
       # quick tunnel (LaunchAgent pins /opt/homebrew/bin/cloudflared). Core formulae.
       "tmux"
       "cloudflared"
+      # Mole (tw93/Mole): Mac cleanup and optimization CLI (`mo` on PATH).
+      # Core formula; nixpkgs `mole` is an unrelated SSH tunnel tool.
+      "mole"
     ];
     casks = [
       "ghostty"
