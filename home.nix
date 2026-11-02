@@ -251,4 +251,35 @@ in
       echo "curl and npm not on PATH; cannot install Pi" >&2
     fi
   '';
+
+  # agent-desktop CLI (desktop app control through the OS accessibility
+  # tree). The npm package bundles its native binaries, so --ignore-scripts
+  # still works: the Node launcher runs them without the postinstall link.
+  # Then install its agent skills for Claude Code once; `agent-desktop skills
+  # get` always prints the copy that matches the installed binary.
+  home.activation.ensureAgentDesktop = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    export PATH="${config.home.homeDirectory}/.asdf/shims:${config.home.homeDirectory}/.local/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
+    if command -v agent-desktop >/dev/null 2>&1; then
+      echo "agent-desktop already available: $(command -v agent-desktop)" >&2
+    elif command -v npm >/dev/null 2>&1; then
+      echo "installing agent-desktop via npm..." >&2
+      $DRY_RUN_CMD npm install -g --ignore-scripts agent-desktop \
+        || echo "warning: agent-desktop npm install failed" >&2
+      if command -v asdf >/dev/null 2>&1; then
+        $DRY_RUN_CMD asdf reshim nodejs || true
+      fi
+    else
+      echo "npm not on PATH; cannot install agent-desktop" >&2
+    fi
+    if [ -e "${config.home.homeDirectory}/.claude/skills/agent-desktop" ]; then
+      echo "agent-desktop skills already installed" >&2
+    elif command -v npx >/dev/null 2>&1; then
+      echo "installing agent-desktop skills..." >&2
+      $DRY_RUN_CMD npx -y skills@1.7.4 add https://github.com/vercel-labs/agent-desktop \
+        --skill agent-desktop --skill agent-desktop-macos -g -a claude-code -y \
+        || echo "warning: agent-desktop skills install failed" >&2
+    else
+      echo "npx not on PATH; cannot install agent-desktop skills" >&2
+    fi
+  '';
 }
