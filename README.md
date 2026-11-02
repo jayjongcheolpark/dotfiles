@@ -25,6 +25,7 @@ Running the switch builds:
 - Automic Vault (Homebrew tap `automic-vault/isotopes`; arm64-only upstream cask)
 - Agent configs (Claude, Codex, opencode all share one AGENTS.md)
 - Pi CLI plus Kun's published Pi config: rose-pine-moon theme, local extensions, model overrides, and three pinned third-party packages
+- [agent-desktop](https://agent-browser.dev/desktop) CLI plus its Claude Code skills
 
 ## Prerequisites
 
@@ -175,6 +176,20 @@ To add another herdr plugin later, append its `owner/repo` to `herdrPlugins` and
 The files under `home/` are the real files - editing them here is editing your live config, no rebuild needed to see the change in your editor.
 `home.nix` uses `mkOutOfStoreSymlink` to point paths like `~/.config/nvim` straight at `home/.config/nvim` in this repo, so the two never drift out of sync.
 You only run `./rebuild.sh` when you change something that isn't just a symlinked file, like a package list or a system default.
+
+## agent-desktop
+
+`home.nix` `ensureAgentDesktop` installs [agent-desktop](https://agent-browser.dev/desktop) if it is missing, then its Claude Code skills if `~/.claude/skills/agent-desktop` is missing:
+
+```sh
+npm install -g --ignore-scripts agent-desktop
+npx -y skills@1.7.4 add https://github.com/vercel-labs/agent-desktop \
+  --skill agent-desktop --skill agent-desktop-macos -g -a claude-code -y
+```
+
+The package bundles its native binaries, so `--ignore-scripts` is safe; calls only go through a Node launcher. The installed skills do not update with the CLI. `agent-desktop skills get desktop` always prints the matching version.
+
+Grant macOS Accessibility permission by hand: System Settings > Privacy & Security > Accessibility, then enable the terminal app that runs agent-desktop. Run `agent-desktop permissions` to check it.
 
 ## Pi configuration
 
