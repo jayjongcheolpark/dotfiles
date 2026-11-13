@@ -68,6 +68,14 @@
         # "switch to ABC" Caps Lock action would fire as well.
         TISRomanSwitchState = 0;
       };
+      # Chrome memory caps (recommended-level policies; see chrome://policy).
+      # Agents open many sites into this Chrome, and site isolation gives each
+      # one its own Helper (Renderer). Discard tabs before swap fills up.
+      "com.google.Chrome" = {
+        TotalMemoryLimitMb = 4096;      # start discarding tabs above ~4 GB
+        HighEfficiencyModeEnabled = true;  # Memory Saver on
+        MemorySaverModeSavings = 2;     # Maximum: discard inactive tabs after ~2h
+      };
       "com.apple.TextInputMenu" = {
         visible = 1;  # Show Input menu in menu bar
       };
